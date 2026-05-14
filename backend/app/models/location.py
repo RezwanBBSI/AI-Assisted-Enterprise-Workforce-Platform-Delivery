@@ -12,6 +12,11 @@ class Location(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     company_id: Mapped[str] = mapped_column(String(36), ForeignKey("companies.id", ondelete="CASCADE"), nullable=False, index=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
+    address_line_1: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    city: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    state: Mapped[str | None] = mapped_column(String(2), nullable=True)   # 2-letter US state code
+    zip_code: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    country: Mapped[str] = mapped_column(String(2), nullable=False, default="US")
     timezone: Mapped[str] = mapped_column(String(64), nullable=False, default="UTC")
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 

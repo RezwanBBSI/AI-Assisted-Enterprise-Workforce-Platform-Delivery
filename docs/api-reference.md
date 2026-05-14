@@ -239,9 +239,16 @@ Create a new location under a company.
 {
   "company_id": "uuid",
   "name": "Downtown Office",
+  "address_line_1": "123 Main St",
+  "city": "Chicago",
+  "state": "IL",
+  "zip_code": "60601",
+  "country": "US",
   "timezone": "America/Chicago"
 }
 ```
+
+> All address fields are optional. `country` defaults to `"US"`. `timezone` defaults to `"UTC"`.
 
 **Response `201`:**
 ```json

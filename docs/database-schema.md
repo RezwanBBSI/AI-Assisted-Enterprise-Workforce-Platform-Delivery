@@ -50,6 +50,11 @@ roles
 | `id` | `VARCHAR(36)` | PK | `uuid4()` |
 | `company_id` | `VARCHAR(36)` | FK → `companies.id` ON DELETE CASCADE, INDEX | — |
 | `name` | `VARCHAR(255)` | NOT NULL | — |
+| `address_line_1` | `VARCHAR(255)` | nullable | — |
+| `city` | `VARCHAR(100)` | nullable | — |
+| `state` | `VARCHAR(2)` | nullable | 2-letter US state code, e.g. `WA` |
+| `zip_code` | `VARCHAR(10)` | nullable | — |
+| `country` | `VARCHAR(2)` | NOT NULL | `"US"` |
 | `timezone` | `VARCHAR(64)` | NOT NULL | `"UTC"` |
 | `is_active` | `BOOLEAN` | NOT NULL | `True` |
 
@@ -168,6 +173,7 @@ python scripts/seed.py --reset --email you@example.com
 | Sprint | Changes |
 |---|---|
 | Sprint 1 | Initial schema: `companies`, `locations`, `roles`, `users`, `user_roles` |
+| Sprint 1 (patch) | Added address fields to `locations`: `address_line_1`, `city`, `state`, `zip_code`, `country` |
 | Sprint 2 | _(planned)_ `time_entries`, `time_corrections`, `attendance_records`, `audit_logs` |
 | Sprint 3 | _(planned)_ `shifts`, `schedules`, `leave_requests`, `leave_balances` |
 | Sprint 4 | _(planned)_ `pay_periods`, `payroll_records`, `overtime_rules` |

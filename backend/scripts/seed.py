@@ -39,6 +39,17 @@ from app.models.user_role import UserRole
 ROLE_NAMES = ["Admin", "Manager", "Employee"]
 DEFAULT_COMPANY = "BBSI Demo"
 
+# Default demo location for the BBSI Demo company.
+DEFAULT_LOCATION = {
+    "name": "BBSI Vancouver HQ",
+    "address_line_1": "805 Broadway St",
+    "city": "Vancouver",
+    "state": "WA",
+    "zip_code": "98660",
+    "country": "US",
+    "timezone": "America/Los_Angeles",
+}
+
 # Default demo users created during seeding.
 # Format: (email, plaintext_password, role_name)
 DEFAULT_USERS = [
@@ -82,6 +93,27 @@ async def seed_roles_and_company(db) -> tuple[dict[str, Role], Company]:
         print(f"  [=] Company already exists: {DEFAULT_COMPANY}  (id={company.id})")
 
     return roles, company
+
+
+async def seed_default_location(db, company: Company) -> None:
+    """Create the default HQ location under the default company if not present."""
+    result = await db.execute(
+        select(Location).where(
+            Location.company_id == company.id,
+            Location.name == DEFAULT_LOCATION["name"],
+        )
+    )
+    location = result.scalar_one_or_none()
+    if location is None:
+        location = Location(company_id=company.id, **DEFAULT_LOCATION)
+        db.add(location)
+        await db.flush()
+        print(
+            f"  [+] Created location: {DEFAULT_LOCATION['name']}  "
+            f"({DEFAULT_LOCATION['city']}, {DEFAULT_LOCATION['state']})"
+        )
+    else:
+        print(f"  [=] Location already exists: {DEFAULT_LOCATION['name']}")
 
 
 async def assign_role(db, email: str, role_name: str, roles: dict, company: Company) -> None:
@@ -142,6 +174,9 @@ async def run(email: str | None, role_name: str, reset: bool) -> None:
     async with AsyncSessionLocal() as db:
         print("\nSeeding roles and company...")
         roles, company = await seed_roles_and_company(db)
+
+        print("\nSeeding default location...")
+        await seed_default_location(db, company)
 
         print("\nSeeding default demo users...")
         await seed_default_users(db, roles, company)
