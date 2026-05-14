@@ -1,7 +1,7 @@
 # Prompt History — BBSI BuildAThon 2026
 # Workforce Platform — AI-Assisted Development Log
 
-Each entry records: the prompt number, date/time, title, agent(s) used, and a summary of work completed.
+Each entry records: the prompt number, date/time, title, agent, model used, and a summary of work completed.
 A new file is started only when this one becomes too long (target: ~100 entries per file).
 
 ---
@@ -9,7 +9,7 @@ A new file is started only when this one becomes too long (target: ~100 entries 
 ## Prompt 001 — 2026-05-14 | Project Kickoff
 
 **Agent:** GitHub Copilot
-**Subagent:** None
+**Model:** Claude Sonnet 4.6
 
 **Summary:**
 User indicated the project would be built from scratch ("start for mscratch"). A multi-step todo plan was drafted to define the tech stack, scaffold the repo, initialize a README, and set up backend/frontend starters. A clarifying question was posed to confirm "from scratch" intent and preferred stack before proceeding.
@@ -19,7 +19,7 @@ User indicated the project would be built from scratch ("start for mscratch"). A
 ## Prompt 002 — 2026-05-14 | Workspace Setup
 
 **Agent:** GitHub Copilot
-**Subagent:** None
+**Model:** Claude Sonnet 4.6
 
 **Summary:**
 Full workspace initialization based on the BBSI BuildAThon 2026 requirements document. Two top-level directories were created:
@@ -34,7 +34,7 @@ Both services verified functional (backend import check passed; Vite dev server 
 ## Prompt 003 — 2026-05-14 | Gitignore Setup
 
 **Agent:** GitHub Copilot
-**Subagent:** None
+**Model:** Claude Sonnet 4.6
 
 **Summary:**
 `.gitignore` files added to both folders:
@@ -47,7 +47,7 @@ Both services verified functional (backend import check passed; Vite dev server 
 ## Prompt 004 — 2026-05-14 | Prompt History Setup
 
 **Agent:** GitHub Copilot
-**Subagent:** None
+**Model:** Claude Sonnet 4.6
 
 **Summary:**
 Created the `prompt-history/` directory at the project root to maintain a chronological log of all prompts throughout the build. This file (`prompt_history_001.md`) was created to record all prompts in a single file, with a new file only started when this one becomes too long. Backfilled entries for Prompts 001–003. Established the log format: prompt number, date/time, title, agent, subagents, and summary. Going forward this file will be updated at the end of every completed prompt.
@@ -57,7 +57,7 @@ Created the `prompt-history/` directory at the project root to maintain a chrono
 ## Prompt 005 — 2026-05-14 | Planning Document Creation
 
 **Agent:** GitHub Copilot
-**Subagent:** None
+**Model:** Claude Sonnet 4.6
 
 **Summary:**
 User confirmed the dependency order proposed in Prompt 004 and requested all five planning documents be created. A `docs/` directory was created at the project root. Files were produced in dependency order:
@@ -76,7 +76,7 @@ User confirmed the dependency order proposed in Prompt 004 and requested all fiv
 ## Prompt 007 — 2026-05-14 | Git Commit Discipline
 
 **Agent:** GitHub Copilot
-**Subagent:** None
+**Model:** Claude Sonnet 4.6
 
 **Summary:**
 User requested consistent, meaningful git commits throughout the project. All accumulated uncommitted work was staged and committed in logical groups with descriptive messages following conventional commit format (`feat`, `docs`, `chore`):
@@ -94,7 +94,7 @@ Commit log verified with `git log --oneline`. Going forward, commits will be mad
 ## Prompt 008 — 2026-05-14 | Detailed Sprint Plans & Completion Criteria
 
 **Agent:** GitHub Copilot
-**Subagent:** None
+**Model:** Claude Sonnet 4.6
 
 **Summary:**
 User requested that planning docs be made significantly more detailed — specifically: exact features per phase, clear completion criteria (e.g., 100% branch coverage), specific models, endpoints, and measurable pass/fail gates. Two docs substantially rewritten:
@@ -112,7 +112,7 @@ Committed as: `docs: expand planning-framework and roadmap with detailed sprint 
 ## Prompt 006 — 2026-05-14 | Build Sequence & Doc Updates
 
 **Agent:** GitHub Copilot
-**Subagent:** None
+**Model:** Claude Sonnet 4.6
 
 **Summary:**
 User asked how to proceed with building the application and requested any necessary doc updates. A 27-step ordered build sequence was presented, grouped by sprint: (1) DB + Auth foundation, (2) Time management APIs + frontend, (3) Scheduling & leave, (4) Payroll & compensation, (5) Compliance & reporting, (6) QA & security, (7) Operational readiness. Two docs were updated:
