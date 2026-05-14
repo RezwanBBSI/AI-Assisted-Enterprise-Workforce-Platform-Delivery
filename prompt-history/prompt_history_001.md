@@ -73,7 +73,42 @@ User confirmed the dependency order proposed in Prompt 004 and requested all fiv
 5. **`docs/quick-reference.md`** — Synthesizes all prior docs into a single at-a-glance cheat sheet covering: start commands, key URLs, project structure, agent roles, sprint summary, requirement coverage counts, API conventions, environment variables, common commands, and links to all key docs.
 
 ---
+## Prompt 007 — 2026-05-14 | Git Commit Discipline
 
+**Agent:** GitHub Copilot
+**Subagent:** None
+
+**Summary:**
+User requested consistent, meaningful git commits throughout the project. All accumulated uncommitted work was staged and committed in logical groups with descriptive messages following conventional commit format (`feat`, `docs`, `chore`):
+
+- `docs: add BBSI BuildAThon 2026 requirements document`
+- `feat(backend): scaffold FastAPI project structure` — 12 files, venv correctly excluded
+- `feat(frontend): scaffold React app with Vite` — 16 files, node_modules correctly excluded
+- `docs: add project planning documents` — all 5 docs/ files
+- `chore: add prompt history log`
+
+Commit log verified with `git log --oneline`. Going forward, commits will be made after each meaningful unit of work using conventional commit prefixes.
+
+---
+
+## Prompt 008 — 2026-05-14 | Detailed Sprint Plans & Completion Criteria
+
+**Agent:** GitHub Copilot
+**Subagent:** None
+
+**Summary:**
+User requested that planning docs be made significantly more detailed — specifically: exact features per phase, clear completion criteria (e.g., 100% branch coverage), specific models, endpoints, and measurable pass/fail gates. Two docs substantially rewritten:
+
+**`docs/planning-framework.md`:**
+- Section 5 (Sprint Structure) replaced: each of the 7 sprints now lists exact DB models with fields, specific API endpoints with HTTP method/path/auth, service-level business rules, and frontend pages/components to build.
+- Section 6 (Definition of Done) replaced: story-level DoD is now a measurable table (100% branch coverage on business logic, 90% overall line coverage, 0 high CVEs, 0 bandit findings, etc.); sprint-level completion checklists added for all 7 sprints with specific, testable pass/fail conditions.
+
+**`docs/roadmap.md`:**
+- Every sprint section expanded with: DB model table (fields listed), API endpoint table (method/path/auth/description), business rules table, frontend component table, and an explicit "Phase Completion Criteria" checklist. Coverage targets, specific HTTP status codes, tool commands, and seeded test data expectations all called out explicitly.
+
+Committed as: `docs: expand planning-framework and roadmap with detailed sprint specs`
+
+---
 ## Prompt 006 — 2026-05-14 | Build Sequence & Doc Updates
 
 **Agent:** GitHub Copilot
