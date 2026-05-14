@@ -121,3 +121,78 @@ User asked how to proceed with building the application and requested any necess
 - **`docs/quick-reference.md`** — Added a "Build Sequence" section with all 27 steps as a checklist table (step number, description, sprint, status) positioned above the start commands.
 
 ---
+
+## Prompt 009 — 2026-05-14 | Sprint 1 Implementation
+
+**Agent:** GitHub Copilot
+**Model:** Claude Sonnet 4.6
+
+**Summary:**
+Full Sprint 1 backend implementation. All code, tests, and migration committed in a single sprint delivery.
+
+**Delivered:**
+- **DB Models** — `Company`, `Location`, `Role`, `User`, `UserRole` (5 tables) with async SQLAlchemy 2.0 mapped columns, FKs, and CASCADE deletes.
+- **Alembic migration** — `72c2b223f8ae_initial_schema.py` creates all 5 tables including indexes (`ix_users_email`, `ix_locations_company_id`) and the `uq_user_company_role` unique constraint.
+- **Security layer** — `app/core/security.py`: `hash_password`, `verify_password`, `create_access_token`, `decode_token` (JWT HS256 via python-jose).
+- **Auth service** — `app/services/auth_service.py`: `register`, `authenticate`, `issue_token`.
+- **RBAC deps** — `app/core/deps.py`: `get_current_user` (401 on invalid JWT), `require_role(*roles)` factory (403 on wrong role).
+- **API endpoints** — 8 total: `POST /auth/register` (201), `POST /auth/login`, `POST /auth/refresh`, `GET /auth/me`, `GET /companies` (Admin), `POST /companies` (Admin), `GET /locations` (Admin|Manager), `POST /locations` (Admin|Manager).
+- **Tests** — 36 tests across 5 files, all passing. 90% line coverage. 100% branch coverage on `AuthService` and `security.py`.
+- **Bug fixes** — `bcrypt` pinned to `3.2.2` (passlib 1.7.4 incompatibility); `StaticPool` added to test engine for SQLite in-memory isolation; HTTPBearer 401 vs 403 distinction corrected in tests.
+
+Committed as: `feat(backend): Sprint 1 — DB foundation, auth, RBAC, and tests`
+
+---
+
+## Prompt 010 — 2026-05-14 | Seed Script & Reference Docs
+
+**Agent:** GitHub Copilot
+**Model:** Claude Sonnet 4.6
+
+**Summary:**
+User requested a runnable seed file and permanent skill/reference docs for the DB and API.
+
+**Delivered:**
+- **`backend/scripts/seed.py`** — Idempotent seed script. `python scripts/seed.py` creates all 3 roles + BBSI Demo company. `--email / --role` flags assign a role to any existing user. `--reset` wipes and recreates all tables (dev only). Verified idempotent (running twice produces `[=]` lines, no duplicates or errors).
+- **`docs/database-schema.md`** — Full schema reference: all 5 tables with column types, constraints, FK relationships, migration commands, seeding instructions, and sprint changelog.
+- **`docs/api-reference.md`** — Full API reference: all 8 endpoints with HTTP method, auth requirement, request/response schemas, error codes table, and upcoming Sprint 2+ endpoint list.
+
+Committed as: `chore: add seed script and reference docs for DB schema and API`
+
+---
+
+## Prompt 011 — 2026-05-14 | Auto-Assign Employee Role + Default Demo Users
+
+**Agent:** GitHub Copilot
+**Model:** Claude Sonnet 4.6
+
+**Summary:**
+User asked for a way to automatically assign a role on registration and requested default users per role for easier testing.
+
+**Delivered:**
+- **`app/services/auth_service.py`** — `register()` now auto-assigns the `Employee` role in `BBSI Demo` company after creating the user (via `flush()` to get user.id). Silent no-op if roles/company not seeded (tests unaffected). All 36 tests still pass.
+- **`backend/scripts/seed.py`** — Added `DEFAULT_USERS` constant and `seed_default_users()` function. Running `python scripts/seed.py` now also creates: `admin@bbsi.demo / Admin1234!` (Admin), `manager@bbsi.demo / Manager1234!` (Manager), `employee@bbsi.demo / Employee1234!` (Employee).
+
+Committed as: `feat(auth): auto-assign Employee role on register; add default demo users to seed`
+
+---
+
+## Prompt 012 — 2026-05-14 | Location Address Fields
+
+**Agent:** GitHub Copilot
+**Model:** Claude Sonnet 4.6
+
+**Summary:**
+User noticed the `Location` model only stored a `name` field, which is insufficient for a PEO platform where state-level compliance (overtime rules, payroll taxes) requires structured address data.
+
+**Delivered:**
+- **`app/models/location.py`** — Added 5 new nullable columns: `address_line_1` (VARCHAR 255), `city` (VARCHAR 100), `state` (VARCHAR 2, 2-letter US code), `zip_code` (VARCHAR 10), `country` (VARCHAR 2, NOT NULL, default `"US"`).
+- **`app/schemas/company.py`** — `LocationCreate` and `LocationResponse` updated to include all address fields (all optional except `country` which defaults to `"US"`).
+- **Alembic migration** — `c095a11bb1fa_add_address_fields_to_locations.py` with `server_default='US'` on `country` column (required for SQLite ALTER TABLE on existing rows).
+- **`backend/scripts/seed.py`** — Added `DEFAULT_LOCATION` dict and `seed_default_location()` function. Seed now creates `BBSI Vancouver HQ` at `805 Broadway St, Vancouver, WA 98660`.
+- **`docs/database-schema.md`** and **`docs/api-reference.md`** — Updated to reflect new columns and request body.
+- All 36 tests still passing.
+
+Committed as: `feat(locations): add address fields (address_line_1, city, state, zip_code, country)`
+
+---

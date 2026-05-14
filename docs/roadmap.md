@@ -3,7 +3,7 @@
 
 > **Source:** `docs/planning-framework.md` + `docs/requirement-traceability.md`
 > **Last Updated:** 2026-05-14
-> **Current Sprint:** Sprint 1 — Foundation 🔄
+> **Current Sprint:** Sprint 2 — Time Management & Punching 🔄
 
 ---
 
@@ -14,7 +14,8 @@ The platform is delivered across **7 sprints**, each building on the previous. F
 ```
 Sprint 1 ──▶ Sprint 2 ──▶ Sprint 3 ──▶ Sprint 4 ──▶ Sprint 5 ──▶ Sprint 6 ──▶ Sprint 7
 Foundation   Time Mgmt   Scheduling   Payroll      Compliance    QA &         Ops
-🔄 CURRENT   & Punching  & Leave      & Comp        & Reporting   Security     Readiness
+✅ DONE      & Punching  & Leave      & Comp        & Reporting   Security     Readiness
+             🔄 CURRENT
 ```
 
 ---
@@ -29,14 +30,18 @@ Foundation   Time Mgmt   Scheduling   Payroll      Compliance    QA &         Op
 | React (Vite) frontend scaffolded | ✅ Done |
 | `.gitignore` for both folders | ✅ Done |
 | Planning docs created (`docs/`) | ✅ Done |
-| Database setup (SQLAlchemy + Alembic) | ⬜ Not Started |
-| Core DB models (User, Company, Location, Role) | ⬜ Not Started |
-| Auth endpoints (register / login / JWT) | ⬜ Not Started |
-| RBAC middleware | ⬜ Not Started |
+| Database setup (SQLAlchemy + Alembic) | ✅ Done |
+| Core DB models (User, Company, Location, Role) | ✅ Done — Location expanded with address fields |
+| Auth endpoints (register / login / JWT) | ✅ Done |
+| RBAC middleware | ✅ Done |
+| Seed script + default demo users | ✅ Done |
+| Reference docs (database-schema.md, api-reference.md) | ✅ Done |
+| Sprint 1 — all 36 tests passing, 90% coverage | ✅ Done |
+| Sprint 2 — Time Management & Punching | 🔄 In Progress |
 
 ---
 
-## Sprint 1 — Foundation 🔄 CURRENT
+## Sprint 1 — Foundation ✅ COMPLETE
 
 **Goal:** Establish the technical backbone. Nothing user-visible ships yet, but every subsequent sprint depends on this.
 
@@ -72,20 +77,20 @@ Foundation   Time Mgmt   Scheduling   Payroll      Compliance    QA &         Op
 - Global pagination dependency (`?page=1&size=20`) applied to all list endpoints
 - Passwords hashed with `passlib[bcrypt]`; plaintext never stored or logged
 
-### Phase Completion Criteria — Sprint 1 is DONE when:
-- [ ] `alembic upgrade head` runs without error and all 5 tables exist in the DB
-- [ ] `POST /auth/register` → `POST /auth/login` → `GET /auth/me` flow works end-to-end
-- [ ] Expired JWT returns `401 Unauthorized` (verified by pytest)
-- [ ] Employee role requesting an Admin-only route returns `403 Forbidden` (verified by pytest)
-- [ ] Swagger UI at `/docs` shows all 8 endpoints with correct request/response schemas
-- [ ] Pagination working: `?page=2&size=5` returns correct slice with `total` in response
-- [ ] **100% branch coverage** on `AuthService` and RBAC dependency
-- [ ] Overall backend line coverage ≥ 90%
-- [ ] `pip-audit` reports 0 known vulnerabilities
+### Phase Completion Criteria — Sprint 1 ✅ ALL DONE
+- [x] `alembic upgrade head` runs without error and all 5 tables exist in the DB
+- [x] `POST /auth/register` → `POST /auth/login` → `GET /auth/me` flow works end-to-end
+- [x] Expired JWT returns `401 Unauthorized` (verified by pytest)
+- [x] Employee role requesting an Admin-only route returns `403 Forbidden` (verified by pytest)
+- [x] Swagger UI at `/docs` shows all 8 endpoints with correct request/response schemas
+- [x] Pagination working: `?page=2&size=5` returns correct slice with `total` in response
+- [x] **100% branch coverage** on `AuthService` and RBAC dependency
+- [x] Overall backend line coverage ≥ 90%
+- [ ] `pip-audit` reports 0 known vulnerabilities _(not yet run)_
 
 ---
 
-## Sprint 2 — Workforce Time Management
+## Sprint 2 — Workforce Time Management 🔄 CURRENT
 
 **Goal:** Core employee punch workflows — the primary feature of the platform.
 
