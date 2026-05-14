@@ -4,7 +4,7 @@
 > **Base URL (dev):** `http://localhost:8000/api/v1`
 > **Swagger UI:** `http://localhost:8000/docs`
 > **ReDoc:** `http://localhost:8000/redoc`
-> **Last Updated:** Sprint 1 (2026-05-14)
+> **Last Updated:** Sprint 2 (2026-05-15)
 
 ---
 
@@ -263,6 +263,173 @@ Create a new location under a company.
 
 ---
 
+## Time Entries — `/api/v1/time-entries`
+
+### `POST /time-entries/clock-in` 🔒
+
+Record a clock-in for the authenticated employee.
+
+**Request body:**
+```json
+{
+  "company_id": "uuid",
+  "location_id": "uuid",
+  "timestamp": "2026-05-15T09:00:00Z"
+}
+```
+> `location_id` and `timestamp` are optional. If `timestamp` is omitted, server UTC now is used.
+
+**Response `201`:**
+```json
+{
+  "id": "uuid",
+  "employee_id": "uuid",
+  "company_id": "uuid",
+  "location_id": "uuid",
+  "clock_in": "2026-05-15T09:00:00",
+  "clock_out": null,
+  "status": "open",
+  "break_minutes": null,
+  "created_at": "2026-05-15T09:00:00"
+}
+```
+
+**Errors:**
+| Code | Reason |
+|---|---|
+| `401` | Not authenticated |
+| `409` | Employee already has an open time entry |
+| `422` | Timestamp is in the future |
+
+---
+
+### `POST /time-entries/clock-out` 🔒
+
+Close the current open time entry for the authenticated employee.
+
+**Request body:**
+```json
+{ "timestamp": "2026-05-15T17:30:00Z" }
+```
+> `timestamp` is optional; defaults to server UTC now.
+
+**Response `200`:** `TimeEntryResponse` with `status: "closed"`
+
+**Errors:**
+| Code | Reason |
+|---|---|
+| `401` | Not authenticated |
+| `404` | No open time entry found |
+| `422` | Timestamp in the future, or before clock_in |
+
+---
+
+### `GET /time-entries` 🔒
+
+Paginated list of time entries. Employees see only their own; Managers/Admins see all.
+
+**Query parameters:**
+| Param | Type | Notes |
+|---|---|---|
+| `employee_id` | string | Manager/Admin only filter |
+| `company_id` | string | Optional filter |
+| `status` | string | `open`, `closed`, or `corrected` |
+| `page` | integer | Default `1` |
+| `size` | integer | Default `20` |
+
+**Response `200`:** Paginated `TimeEntryResponse` list.
+
+---
+
+### `GET /time-entries/{id}` 🔒
+
+Fetch a single time entry. Employees may only retrieve their own entries.
+
+**Errors:**
+| Code | Reason |
+|---|---|
+| `403` | Employee requesting another user's entry |
+| `404` | Entry not found |
+
+---
+
+### `POST /time-entries/{id}/correction` 🔒
+
+Submit a correction request for a time entry (own entries only).
+
+**Request body:**
+```json
+{
+  "reason": "Forgot to clock in when I arrived",
+  "new_clock_in": "2026-05-15T08:45:00Z",
+  "new_clock_out": "2026-05-15T17:00:00Z"
+}
+```
+> `new_clock_out` is optional.
+
+**Response `201`:** `CorrectionResponse` with `status: "pending"`
+
+**Errors:**
+| Code | Reason |
+|---|---|
+| `403` | Attempting to correct another employee's entry |
+| `404` | Entry not found |
+
+---
+
+### `PUT /time-entries/{id}/correction/{cid}` 🔒 Admin | Manager
+
+Approve or deny a pending correction.
+
+**Request body:**
+```json
+{ "approve": true }
+```
+
+**Response `200`:** `CorrectionResponse` with updated `status` and `reviewed_at`.
+
+If approved, the parent `TimeEntry` is updated with the new times and its `status` becomes `"corrected"`.
+
+**Errors:**
+| Code | Reason |
+|---|---|
+| `403` | Employee role cannot review corrections |
+| `404` | Correction or entry not found |
+| `409` | Correction already reviewed |
+
+---
+
+## Attendance — `/api/v1/attendance`
+
+### `GET /attendance` 🔒 Admin | Manager
+
+Paginated list of daily attendance records.
+
+**Query parameters:**
+| Param | Type | Notes |
+|---|---|---|
+| `company_id` | string | Optional filter |
+| `employee_id` | string | Optional filter |
+| `page` | integer | Default `1` |
+| `size` | integer | Default `20` |
+
+**Response `200`:** Paginated `AttendanceResponse` list.
+
+---
+
+### `GET /attendance/missing-punches` 🔒 Admin | Manager
+
+Return all open time entries with a `clock_in` older than 24 hours (employees who forgot to clock out).
+
+**Query parameters:**
+| Param | Type | Notes |
+|---|---|---|
+| `company_id` | string | Optional filter |
+
+**Response `200`:** `list[TimeEntryResponse]`
+
+---
+
 ## Common Error Responses
 
 | Code | Meaning |
@@ -270,18 +437,17 @@ Create a new location under a company.
 | `401 Unauthorized` | Missing, expired, or invalid JWT |
 | `403 Forbidden` | Authenticated but insufficient role |
 | `404 Not Found` | Resource does not exist |
-| `409 Conflict` | Duplicate resource (e.g., email already taken) |
-| `422 Unprocessable Entity` | Request body failed validation |
+| `409 Conflict` | Duplicate resource or already-reviewed correction |
+| `422 Unprocessable Entity` | Request body failed validation or business rule (future timestamp, etc.) |
 
 ---
 
-## Upcoming Endpoints (Sprint 2+)
+## Upcoming Endpoints (Sprint 3+)
 
 | Sprint | Endpoints |
 |---|---|
-| Sprint 2 | `POST /time-entries/clock-in`, `POST /time-entries/clock-out`, `GET /time-entries`, correction workflow, attendance |
 | Sprint 3 | Shifts, schedules, leave requests, leave balances |
 | Sprint 4 | Pay periods, payroll records, overtime calculations |
-| Sprint 5 | Compliance reports, audit logs, export |
+| Sprint 5 | Compliance reports, export |
 
 > This file is updated at the end of each sprint. See `docs/roadmap.md` for full sprint specs.

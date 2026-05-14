@@ -196,3 +196,58 @@ User noticed the `Location` model only stored a `name` field, which is insuffici
 Committed as: `feat(locations): add address fields (address_line_1, city, state, zip_code, country)`
 
 ---
+
+## Prompt 013 — 2026-05-15 | Sprint 2 — Time Management & Punching
+
+**Agent:** GitHub Copilot
+**Model:** Claude Sonnet 4.6
+
+**Summary:**
+Full Sprint 2 backend implementation for time management and punching. All models, services, endpoints, tests, migration, and docs completed.
+
+**Delivered:**
+
+**Core utilities:**
+- **`app/core/exceptions.py`** — `PunchError(message, status_code)` exception class for punch workflow errors.
+- **`app/core/utils.py`** — `now_utc()` (naive UTC datetime) and `to_utc_naive(dt)` (normalize any datetime to naive UTC for consistent DB storage).
+
+**DB Models (4 new tables):**
+- **`app/models/time_entry.py`** — `TimeEntry`: clock_in/clock_out, status (`open`/`closed`/`corrected`), break_minutes, employee_id/company_id/location_id FKs, corrections relationship.
+- **`app/models/time_correction.py`** — `TimeCorrection`: correction request with original/new times, reason, status (`pending`/`approved`/`denied`), requested_by/approved_by.
+- **`app/models/attendance_record.py`** — `AttendanceRecord`: one record per employee per company per date with unique constraint; statuses: `present`/`absent`/`late`/`missing_punch`.
+- **`app/models/audit_log.py`** — `AuditLog`: entity_type, entity_id, action, performed_by, performed_at, details (JSON string).
+
+**Schemas:**
+- **`app/schemas/time_entry.py`** — `ClockInRequest`, `ClockOutRequest`, `TimeEntryResponse`, `CorrectionRequest`, `CorrectionReviewRequest`, `CorrectionResponse`, `AttendanceResponse`.
+
+**Services:**
+- **`app/services/punch_validation_service.py`** — `PunchValidationService` (stateless). `validate_clock_in`: 422 if future, 409 if already open. `validate_clock_out`: 404 if no open entry, 422 if future or clock_out ≤ clock_in. 100% branch coverage.
+- **`app/services/time_entry_service.py`** — `TimeEntryService`: `clock_in`, `clock_out`, `get_entries`, `get_entry`, `submit_correction`, `review_correction` (writes AuditLog on every action). `AttendanceService`: `get_attendance`, `get_missing_punches` (open entries > 24 hrs).
+
+**API Endpoints:**
+- **`app/api/v1/endpoints/time_entries.py`** — `POST /clock-in` (201), `POST /clock-out` (200), `GET /` (paginated, employees see own only), `GET /{id}` (ownership check for employees), `POST /{id}/correction` (201, own entries only), `PUT /{id}/correction/{cid}` (Manager/Admin only).
+- **`app/api/v1/endpoints/attendance.py`** — `GET /` (Manager/Admin, paginated), `GET /missing-punches` (Manager/Admin, list of open entries > 24 hrs).
+
+**Updates:**
+- **`app/models/__init__.py`** — Added imports for all 4 new models.
+- **`app/api/v1/router.py`** — Registered `time_entries` (`/time-entries`) and `attendance` (`/attendance`) routers.
+
+**Migration:**
+- **`alembic/versions/08cbdf02a2cd_sprint_2_time_management_tables.py`** — Adds `time_entries`, `time_corrections`, `attendance_records`, `audit_logs` tables. Applied with `alembic upgrade head`.
+
+**Tests (26 new, 62 total, all passing):**
+- **`tests/sprint2_helpers.py`** — `_seed_sprint2()` helper: creates company, location, 3 users with roles, returns tokens dict.
+- **`tests/test_punch_validation.py`** — 7 tests covering all branches of `PunchValidationService` (100% branch coverage).
+- **`tests/test_time_entries.py`** — 15 tests: clock-in/out flows, duplicate detection, future timestamp rejection, employee isolation, get-by-id ownership, correction submit/approve, employee cannot review.
+- **`tests/test_attendance.py`** — 4 tests: manager list, employee 403, missing-punches empty state, unauthenticated 401.
+
+**Docs updated:**
+- **`docs/database-schema.md`** — Added 4 new table sections; updated ER diagram; updated migration head; Sprint 2 marked complete in changelog.
+- **`docs/api-reference.md`** — Added Sprint 2 endpoints (`/time-entries/*` and `/attendance/*`) with full request/response schemas and error tables; removed Sprint 2 from "upcoming" list.
+- **`docs/roadmap.md`** — Sprint 2 marked ✅ COMPLETE; current sprint updated to Sprint 3; Status table updated; Sprint 2 completion criteria checked off.
+
+**Bug fix encountered:** `PaginatedResponse.items: list` does not auto-serialize SQLAlchemy ORM objects. Fixed by explicitly calling `TimeEntryResponse.model_validate(item)` on each item in list endpoints (same pattern used by existing companies/locations endpoints).
+
+Committed as: `feat(backend): Sprint 2 — time management, punching, corrections, attendance, 62 tests`
+
+---
