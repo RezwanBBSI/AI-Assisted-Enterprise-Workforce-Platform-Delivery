@@ -4,7 +4,11 @@ from app.api.v1.endpoints import auth
 from app.api.v1.endpoints import companies
 from app.api.v1.endpoints import employees
 from app.api.v1.endpoints import health
+from app.api.v1.endpoints import leave_balances
+from app.api.v1.endpoints import leave_requests
 from app.api.v1.endpoints import locations
+from app.api.v1.endpoints import policies
+from app.api.v1.endpoints import schedules
 from app.api.v1.endpoints import time_entries
 
 api_router = APIRouter()
@@ -15,3 +19,7 @@ api_router.include_router(locations.router, prefix="/locations", tags=["location
 api_router.include_router(employees.router, prefix="/employees", tags=["employees"])
 api_router.include_router(time_entries.router, prefix="/time-entries", tags=["time-entries"])
 api_router.include_router(attendance.router, prefix="/attendance", tags=["attendance"])
+api_router.include_router(leave_requests.router, prefix="/leave-requests", tags=["leave-requests"])
+api_router.include_router(leave_balances.router, prefix="/leave-balances", tags=["leave-balances"])
+api_router.include_router(schedules.router, prefix="/schedules", tags=["schedules"])
+api_router.include_router(policies.router, prefix="/policies", tags=["policies"])

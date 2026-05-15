@@ -2,8 +2,8 @@
 # BBSI BuildAThon 2026 — Workforce Platform
 
 > **Auto-generated from:** `backend/app/models/`
-> **Last Updated:** Sprint 2 (2026-05-15)
-> **Current migration head:** `alembic/versions/08cbdf02a2cd_sprint_2_time_management_tables.py`
+> **Last Updated:** Sprint 3 (2026-05-15)
+> **Current migration head:** `alembic/versions/18d82f8dca79_sprint_3_scheduling_and_leave.py`
 > **Apply:** `cd backend && alembic upgrade head`
 
 ---
@@ -16,6 +16,10 @@ companies
     └── user_roles         (company_id FK)
     └── time_entries       (company_id FK)
     └── attendance_records (company_id FK)
+    └── leave_requests     (company_id FK)
+    └── leave_balances     (company_id FK)
+    └── shift_schedules    (company_id FK)
+    └── company_policies   (company_id FK)
 
 users
     └── user_roles         (user_id FK)
@@ -23,6 +27,10 @@ users
     └── time_corrections   (requested_by / approved_by FK)
     └── attendance_records (employee_id FK)
     └── audit_logs         (performed_by FK)
+    └── leave_requests     (employee_id / reviewed_by FK)
+    └── leave_balances     (employee_id FK)
+    └── shift_schedules    (employee_id / created_by FK)
+    └── company_policies   (updated_by FK)
 
 roles
     └── user_roles         (role_id FK)
@@ -218,6 +226,116 @@ time_entries
 
 **Action values (time domain):** `clock_in`, `clock_out`, `correction_submitted`, `correction_approved`, `correction_denied`
 
+**Action values (leave domain):** `leave_submitted`, `leave_approved`, `leave_denied`, `leave_cancelled`
+
+**Action values (schedule domain):** `shift_created`, `shift_updated`, `shift_deleted`
+
+---
+
+## Table: `leave_requests`
+
+**Model:** `app/models/leave_request.py` → `LeaveRequest`
+
+| Column | Type | Constraints | Default |
+|---|---|---|---|
+| `id` | `VARCHAR(36)` | PK | `uuid4()` |
+| `employee_id` | `VARCHAR(36)` | FK → `users.id` CASCADE, INDEX | — |
+| `company_id` | `VARCHAR(36)` | FK → `companies.id` CASCADE, INDEX | — |
+| `leave_type` | `VARCHAR(16)` | NOT NULL | — |
+| `start_date` | `DATE` | NOT NULL | — |
+| `end_date` | `DATE` | NOT NULL | — |
+| `days_requested` | `FLOAT` | NOT NULL | — |
+| `reason` | `TEXT` | nullable | — |
+| `status` | `VARCHAR(16)` | NOT NULL | `"pending"` |
+| `reviewed_by` | `VARCHAR(36)` | FK → `users.id` SET NULL, nullable | — |
+| `reviewed_at` | `DATETIME` | nullable | — |
+| `review_comment` | `TEXT` | nullable | — |
+| `created_at` | `DATETIME` | NOT NULL | `utcnow()` |
+
+**Leave type values:** `pto`, `sick`, `comp`, `unpaid`
+
+**Status values:** `pending`, `approved`, `denied`, `cancelled`
+
+**Relationships:**
+- `employee` → many-to-one → `User` (via `employee_id`)
+- `reviewer` → many-to-one → `User` (via `reviewed_by`; nullable)
+- `company` → many-to-one → `Company`
+
+---
+
+## Table: `leave_balances`
+
+**Model:** `app/models/leave_balance.py` → `LeaveBalance`
+
+| Column | Type | Constraints | Default |
+|---|---|---|---|
+| `id` | `VARCHAR(36)` | PK | `uuid4()` |
+| `employee_id` | `VARCHAR(36)` | FK → `users.id` CASCADE, INDEX | — |
+| `company_id` | `VARCHAR(36)` | FK → `companies.id` CASCADE, INDEX | — |
+| `year` | `INTEGER` | NOT NULL | — |
+| `pto_total` | `FLOAT` | NOT NULL | `0.0` |
+| `pto_used` | `FLOAT` | NOT NULL | `0.0` |
+| `sick_total` | `FLOAT` | NOT NULL | `0.0` |
+| `sick_used` | `FLOAT` | NOT NULL | `0.0` |
+| `comp_earned` | `FLOAT` | NOT NULL | `0.0` |
+| `comp_used` | `FLOAT` | NOT NULL | `0.0` |
+| `updated_at` | `DATETIME` | NOT NULL | `utcnow()` |
+
+**Unique constraint:** `uq_leave_balance_employee_company_year` on `(employee_id, company_id, year)`
+
+> If no row exists for the requested `(employee_id, company_id, year)`, the API auto-creates a zeroed row.
+
+---
+
+## Table: `shift_schedules`
+
+**Model:** `app/models/shift_schedule.py` → `ShiftSchedule`
+
+| Column | Type | Constraints | Default |
+|---|---|---|---|
+| `id` | `VARCHAR(36)` | PK | `uuid4()` |
+| `employee_id` | `VARCHAR(36)` | FK → `users.id` CASCADE, INDEX | — |
+| `company_id` | `VARCHAR(36)` | FK → `companies.id` CASCADE, INDEX | — |
+| `location_id` | `VARCHAR(36)` | FK → `locations.id` SET NULL, nullable | — |
+| `shift_date` | `DATE` | NOT NULL, INDEX | — |
+| `shift_start` | `TIME` | NOT NULL | — |
+| `shift_end` | `TIME` | NOT NULL | — |
+| `break_minutes` | `INTEGER` | NOT NULL | `0` |
+| `created_by` | `VARCHAR(36)` | FK → `users.id` SET NULL, nullable | — |
+| `created_at` | `DATETIME` | NOT NULL | `utcnow()` |
+
+**Break enforcement rules:**
+- Shift duration ≤ 6 hrs → 0 min required
+- Shift duration > 6 hrs and ≤ 8 hrs → minimum 30 min break
+- Shift duration > 8 hrs → minimum 60 min break
+
+**Relationships:**
+- `employee` → many-to-one → `User` (via `employee_id`)
+- `creator` → many-to-one → `User` (via `created_by`; nullable)
+- `location` → many-to-one → `Location` (nullable)
+- `company` → many-to-one → `Company`
+
+---
+
+## Table: `company_policies`
+
+**Model:** `app/models/company_policy.py` → `CompanyPolicy`
+
+| Column | Type | Constraints | Default |
+|---|---|---|---|
+| `id` | `VARCHAR(36)` | PK | `uuid4()` |
+| `company_id` | `VARCHAR(36)` | FK → `companies.id` CASCADE, INDEX | — |
+| `policy_key` | `VARCHAR(64)` | NOT NULL, INDEX | — |
+| `policy_value` | `TEXT` | NOT NULL | — |
+| `updated_by` | `VARCHAR(36)` | FK → `users.id` SET NULL, nullable | — |
+| `updated_at` | `DATETIME` | NOT NULL | `utcnow()` |
+
+**Unique constraint:** `uq_company_policy_key` on `(company_id, policy_key)`
+
+> `policy_value` stores JSON-serialized values (numbers, strings, arrays, objects) as text.
+
+**Example keys:** `core_hours_start`, `core_hours_end`, `overtime_threshold`, `min_wage`, `max_hours_per_week`, `holiday_dates`
+
 ---
 
 ## System Tables
@@ -273,5 +391,5 @@ python scripts/seed.py --reset --email you@example.com
 | Sprint 1 | Initial schema: `companies`, `locations`, `roles`, `users`, `user_roles` |
 | Sprint 1 (patch) | Added address fields to `locations`: `address_line_1`, `city`, `state`, `zip_code`, `country` |
 | Sprint 2 | `time_entries`, `time_corrections`, `attendance_records`, `audit_logs` — time management and punching |
-| Sprint 3 | _(planned)_ `shifts`, `schedules`, `leave_requests`, `leave_balances` |
-| Sprint 4 | _(planned)_ `pay_periods`, `payroll_records`, `overtime_rules` |
+| Sprint 3 | `leave_requests`, `leave_balances`, `shift_schedules`, `company_policies` — scheduling and leave management |
+| Sprint 4 | _(planned)_ `timesheets`, `payroll_line_items`, `payroll_exports` |

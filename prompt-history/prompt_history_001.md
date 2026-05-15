@@ -292,3 +292,54 @@ All 62 existing tests still pass. Backend hot-reloaded; `/employees` tag visible
 Committed as: `feat(employees): add GET /employees and GET /employees/{id} endpoints`
 
 ---
+
+## Prompt 016 — 2026-05-15 | Sprint 3 — Scheduling & Leave Management
+
+**Agent:** GitHub Copilot
+**Model:** Claude Sonnet 4.6
+
+**Summary:**
+Full Sprint 3 backend implementation for scheduling, leave management, and company policies. All models, services, endpoints, migration, tests, and docs completed. 96 total tests passing (34 new).
+
+**Delivered:**
+
+**DB Models (4 new tables):**
+- **`app/models/leave_request.py`** — `LeaveRequest`: employee leave requests with type (`pto`/`sick`/`comp`/`unpaid`), date range, days requested, status (`pending`/`approved`/`denied`/`cancelled`), reviewer FK, review comment.
+- **`app/models/leave_balance.py`** — `LeaveBalance`: per-employee per-company per-year balance tracking (PTO total/used, sick total/used, comp earned/used). Unique constraint on `(employee_id, company_id, year)`.
+- **`app/models/shift_schedule.py`** — `ShiftSchedule`: assigned work shifts with date, start/end times, break minutes, location FK, created_by FK.
+- **`app/models/company_policy.py`** — `CompanyPolicy`: key-value store for per-company configuration (e.g., `core_hours_start`, `overtime_threshold`). Unique constraint on `(company_id, policy_key)`.
+- **`app/models/__init__.py`** — Updated to import all 4 new models.
+
+**Schemas:**
+- **`app/schemas/scheduling.py`** — `LeaveRequestCreate`, `LeaveReviewRequest`, `LeaveRequestResponse`, `LeaveBalanceResponse`, `ShiftCreate`, `ShiftUpdate`, `ShiftResponse`, `PolicyUpdate`, `PolicyResponse`. All response schemas include `model_config = {"from_attributes": True}`.
+
+**Services:**
+- **`app/services/leave_service.py`** — `LeaveValidationService` (stateless): `validate_leave_dates` (422 if end < start), `validate_leave_balance` (422 if over-balance, unpaid skipped). `LeaveService`: `submit()`, `list_requests()`, `review()` (deducts balance on approve, writes AuditLog), `cancel()` (403 if not owner, 409 if already reviewed). `LeaveBalanceService`: `get_balance()` (auto-creates zeroed row if not found).
+- **`app/services/schedule_service.py`** — `ScheduleService`: `_validate_break()` — ≤6hr→0 min; 6–8hr→≥30 min; >8hr→≥60 min; raises PunchError 422. `create()`, `list_shifts()`, `get_shift()`, `update()`, `delete()` — all write AuditLog.
+- **`app/services/policy_service.py`** — `PolicyService`: `list_policies()`, `upsert_policy()`.
+
+**API Endpoints (4 new files, 11 new routes):**
+- **`app/api/v1/endpoints/leave_requests.py`** — `POST /leave-requests` (201), `GET /leave-requests` (employees see own), `PUT /leave-requests/{id}/review` (Manager/Admin), `PUT /leave-requests/{id}/cancel`.
+- **`app/api/v1/endpoints/leave_balances.py`** — `GET /leave-balances/{employee_id}` (employees see own, 403 for others).
+- **`app/api/v1/endpoints/schedules.py`** — `POST /schedules` (201, Manager/Admin), `GET /schedules` (employees see own), `PUT /schedules/{id}` (Manager/Admin), `DELETE /schedules/{id}` (204, Manager/Admin).
+- **`app/api/v1/endpoints/policies.py`** — `GET /policies` (Manager/Admin), `PUT /policies/{key}` (Admin only).
+- **`app/api/v1/router.py`** — Registered all 4 new routers.
+
+**Migration:**
+- **`alembic/versions/18d82f8dca79_sprint_3_scheduling_and_leave.py`** — Creates all 4 Sprint 3 tables with indexes and unique constraints. Applied with `alembic upgrade head`.
+
+**Tests (34 new, 96 total, all passing):**
+- **`tests/sprint3_helpers.py`** — `_seed_sprint3()`: builds on `_seed_sprint2`, adds `LeaveBalance` row (10 PTO, 5 sick, 5 comp) and 2 `CompanyPolicy` rows for the Employee user. Returns extended context dict.
+- **`tests/test_leave_requests.py`** — 13 tests: submit, over-balance 422, end-before-start 422, unpaid no-balance-check, unauthenticated 401, employee-sees-own, manager-sees-all, approve, deny, double-review 409, employee-cannot-review 403, cancel pending, cannot-cancel-approved 409.
+- **`tests/test_leave_balances.py`** — 4 tests: employee sees own, manager sees any, employee cannot see other (403), auto-create zeroed row.
+- **`tests/test_schedules.py`** — 13 tests: manager creates, employee 403, unauthenticated 401, break enforcement (5 scenarios), employee sees own, manager sees all, manager updates, manager deletes, 404 on nonexistent.
+- **`tests/test_policies.py`** — 4 tests: manager lists, admin upserts, manager cannot upsert 403, employee cannot list 403.
+
+**Docs updated:**
+- **`docs/database-schema.md`** — Added 4 new table sections; updated ERD; updated migration head to `18d82f8dca79`; Sprint 3 marked complete in changelog.
+- **`docs/api-reference.md`** — Added full sections for Leave Requests, Leave Balances, Schedules, Policies; removed Sprint 3 from "Upcoming Endpoints"; updated header to Sprint 3.
+- **`docs/roadmap.md`** — Sprint 3 marked ✅ COMPLETE with all criteria checked; current sprint updated to Sprint 4; ASCII diagram updated.
+
+Committed as: `feat(backend): Sprint 3 — scheduling, leave management, policies, and tests`
+
+---
