@@ -263,6 +263,75 @@ Create a new location under a company.
 
 ---
 
+## Employees — `/api/v1/employees`
+
+### `GET /employees` 🔒 Admin | Manager
+
+Paginated list of all employees who have at least one company role. Optionally filter by company.
+
+**Query parameters:**
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `company_id` | `string` | — | Filter employees belonging to this company |
+| `page` | `integer` | `1` | Page number |
+| `size` | `integer` | `20` | Page size (max 100) |
+
+**Response `200`:**
+```json
+{
+  "total": 3,
+  "page": 1,
+  "size": 20,
+  "items": [
+    {
+      "id": "uuid",
+      "email": "employee@bbsi.demo",
+      "full_name": "Employee",
+      "is_active": true,
+      "created_at": "2026-05-14T00:00:00",
+      "roles": [
+        { "company_id": "uuid", "role_name": "Employee" }
+      ]
+    }
+  ]
+}
+```
+
+**Errors:**
+| Code | Reason |
+|---|---|
+| `401` | Not authenticated |
+| `403` | Authenticated user is not Manager or Admin |
+
+---
+
+### `GET /employees/{employee_id}` 🔒 Admin | Manager
+
+Fetch a single employee by their UUID, including their assigned roles.
+
+**Response `200`:**
+```json
+{
+  "id": "uuid",
+  "email": "admin@bbsi.demo",
+  "full_name": "Admin",
+  "is_active": true,
+  "created_at": "2026-05-14T00:00:00",
+  "roles": [
+    { "company_id": "uuid", "role_name": "Admin" }
+  ]
+}
+```
+
+**Errors:**
+| Code | Reason |
+|---|---|
+| `401` | Not authenticated |
+| `403` | Authenticated user is not Manager or Admin |
+| `404` | Employee not found |
+
+---
+
 ## Time Entries — `/api/v1/time-entries`
 
 ### `POST /time-entries/clock-in` 🔒

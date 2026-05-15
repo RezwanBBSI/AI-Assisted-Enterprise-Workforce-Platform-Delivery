@@ -251,3 +251,44 @@ Full Sprint 2 backend implementation for time management and punching. All model
 Committed as: `feat(backend): Sprint 2 — time management, punching, corrections, attendance, 62 tests`
 
 ---
+
+## Prompt 014 — 2026-05-15 | Swagger Demo Credentials Banner
+
+**Agent:** GitHub Copilot
+**Model:** Claude Sonnet 4.6
+
+**Summary:**
+User requested that the default demo account credentials be visible at the top of the Swagger UI without requiring users to dig through the seed script.
+
+**Delivered:**
+- **`app/main.py`** — Added `_description` multiline string containing a Markdown table of all three demo accounts (`admin@bbsi.demo`, `manager@bbsi.demo`, `employee@bbsi.demo`) with passwords and roles, plus a tip about clicking the Authorize button. Passed as `description=_description` to the `FastAPI(...)` constructor.
+
+Uvicorn hot-reloaded automatically. The credentials table is now visible at the top of http://127.0.0.1:8000/docs immediately below the API title.
+
+Committed as: `feat(docs): add demo credentials banner to Swagger UI`
+
+---
+
+## Prompt 015 — 2026-05-15 | Employees API Endpoint
+
+**Agent:** GitHub Copilot
+**Model:** Claude Sonnet 4.6
+
+**Summary:**
+User noted that several API calls (clock-in, attendance, corrections) require an `employee_id` UUID but there was no endpoint to look up employees. Requested an API returning employee names, emails, and IDs.
+
+**Delivered:**
+- **`app/schemas/auth.py`** — Added two new Pydantic models:
+  - `EmployeeRoleInfo`: `company_id`, `role_name`
+  - `EmployeeResponse`: `id`, `email`, `full_name`, `is_active`, `created_at`, `roles: list[EmployeeRoleInfo]`
+- **`app/api/v1/endpoints/employees.py`** — New endpoint file (Manager/Admin only):
+  - `GET /employees` — Paginated list of all employees with roles; optional `company_id` filter. Uses `selectinload(User.user_roles).selectinload(UserRole.role)` for async-safe eager loading.
+  - `GET /employees/{employee_id}` — Single employee lookup by UUID; returns 404 if not found.
+- **`app/api/v1/router.py`** — Imported `employees` module and registered `employees.router` at prefix `/employees` with tag `employees`.
+- **`docs/api-reference.md`** — Added full `Employees — /api/v1/employees` section with both endpoints, request/response schemas, query param tables, and error code tables.
+
+All 62 existing tests still pass. Backend hot-reloaded; `/employees` tag visible in Swagger.
+
+Committed as: `feat(employees): add GET /employees and GET /employees/{id} endpoints`
+
+---

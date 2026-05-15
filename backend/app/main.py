@@ -18,9 +18,26 @@ async def lifespan(app: FastAPI):
     await engine.dispose()
 
 
+_description = """
+## BBSI Workforce Platform API
+
+### 🔑 Demo Accounts
+
+Use these credentials with `POST /api/v1/auth/login` to get a Bearer token.
+
+| Role | Email | Password |
+|------|-------|----------|
+| **Admin** | `admin@bbsi.demo` | `Admin1234!` |
+| **Manager** | `manager@bbsi.demo` | `Manager1234!` |
+| **Employee** | `employee@bbsi.demo` | `Employee1234!` |
+
+> **Tip:** Click **Authorize** (🔒) at the top-right, paste the `access_token` from the login response, and all protected endpoints will include your Bearer token automatically.
+"""
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
+    description=_description,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     lifespan=lifespan,
 )
