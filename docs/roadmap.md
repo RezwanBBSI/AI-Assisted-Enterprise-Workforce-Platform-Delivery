@@ -2,8 +2,8 @@
 # BBSI BuildAThon 2026 — Workforce Time Tracking & Payroll Integration Platform
 
 > **Source:** `docs/planning-framework.md` + `docs/requirement-traceability.md`
-> **Last Updated:** 2026-05-15
-> **Current Sprint:** Sprint 4 — Payroll & Compensation (upcoming)
+> **Last Updated:** 2026-05-18
+> **Current Sprint:** Sprint 5 — Compliance & Reporting
 
 ---
 
@@ -15,12 +15,12 @@ The platform is delivered across **7 sprints**, each building on the previous. F
 Sprint 1 ──▶ Sprint 2 ──▶ Sprint 3 ──▶ Sprint 4 ──▶ Sprint 5 ──▶ Sprint 6 ──▶ Sprint 7
 Foundation   Time Mgmt   Scheduling   Payroll      Compliance    QA &         Ops
 ✅ DONE      & Punching  & Leave      & Comp        & Reporting   Security     Readiness
-             ✅ DONE      ✅ DONE       🔄 NEXT
+             ✅ DONE      ✅ DONE       ✅ DONE       🔄 CURRENT
 ```
 
 ---
 
-## Current Status — 2026-05-15
+## Current Status — 2026-05-18
 
 | Item | Status |
 |---|---|
@@ -39,6 +39,7 @@ Foundation   Time Mgmt   Scheduling   Payroll      Compliance    QA &         Op
 | Sprint 1 — all 36 tests passing, 90% coverage | ✅ Done |
 | Sprint 2 — Time Management & Punching | ✅ Done — 62 tests, 82% coverage |
 | Sprint 3 — Scheduling & Leave Management | ✅ Done — 96 tests (34 new), 4 new tables, 11 new endpoints |
+| Sprint 4 — Payroll & Compensation | ✅ Done — 131 tests (35 new), 3 new tables, 6 new endpoints |
 
 ---
 
@@ -202,7 +203,7 @@ Foundation   Time Mgmt   Scheduling   Payroll      Compliance    QA &         Op
 
 ---
 
-## Sprint 4 — Payroll & Compensation
+## Sprint 4 — Payroll & Compensation ✅ COMPLETE
 
 **Goal:** Process timesheets and calculate all compensation components accurately.
 
@@ -248,17 +249,18 @@ Foundation   Time Mgmt   Scheduling   Payroll      Compliance    QA &         Op
 | `PayPeriodSummaryCard` | Total regular / OT / holiday / differential hours at a glance |
 | `PayrollExportPage` | Pay period selector, format selector (CSV/JSON), generate + download button |
 
-### Phase Completion Criteria — Sprint 4 is DONE when:
-- [ ] Timesheet generated from Sprint 2 time entries correctly categorises all rate types
-- [ ] Daily OT (> 8 hrs): dedicated pytest confirms 1.5× applied to correct hours only
-- [ ] Weekly OT (> 40 hrs): dedicated pytest with multi-day entries confirms correct split
-- [ ] Double time (> 12 hrs/day): dedicated pytest confirms 2.0× on hours beyond threshold
-- [ ] Holiday multiplier applied only on dates listed in `CompanyPolicy.holiday_dates` (pytest)
-- [ ] Night differential applied only within configured overnight window (pytest with boundary values)
-- [ ] PTO approved in Sprint 3 appears as `rate_type = pto` line item on timesheet (pytest)
-- [ ] CSV export validated against documented schema; JSON export parseable (pytest)
-- [ ] Timesheet submit → approve → export flow passes Playwright E2E test
-- [ ] **100% branch coverage** on `PayrollCalculationService`
+### Phase Completion Criteria — Sprint 4 ✅ ALL DONE
+- [x] Timesheet generated from Sprint 2 time entries correctly categorises all rate types
+- [x] Daily OT (> 8 hrs): dedicated pytest confirms 1.5× applied to correct hours only
+- [x] Weekly OT (> 40 hrs): dedicated pytest with multi-day entries confirms correct split
+- [x] Double time (> 12 hrs/day): dedicated pytest confirms 2.0× on hours beyond threshold
+- [x] Holiday multiplier applied only on dates listed in `CompanyPolicy.holiday_dates` (pytest)
+- [x] Night differential applied only within configured overnight window (pytest with boundary values)
+- [x] PTO approved in Sprint 3 appears as `rate_type = pto` line item on timesheet (pytest)
+- [x] CSV export validated against documented schema; JSON export parseable (pytest)
+- [x] Timesheet generate → submit → approve → export flow passes integration tests
+- [x] **100% branch coverage** on `PayrollCalculationService`
+- [ ] Playwright E2E: timesheet submit → approve → export _(deferred to frontend sprint)_
 
 ---
 

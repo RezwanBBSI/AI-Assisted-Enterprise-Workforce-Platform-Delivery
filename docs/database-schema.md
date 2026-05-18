@@ -2,8 +2,8 @@
 # BBSI BuildAThon 2026 — Workforce Platform
 
 > **Auto-generated from:** `backend/app/models/`
-> **Last Updated:** Sprint 3 (2026-05-15)
-> **Current migration head:** `alembic/versions/18d82f8dca79_sprint_3_scheduling_and_leave.py`
+> **Last Updated:** Sprint 4 (2026-05-18)
+> **Current migration head:** `alembic/versions/3f7a91c4d82e_sprint_4_payroll_tables.py`
 > **Apply:** `cd backend && alembic upgrade head`
 
 ---
@@ -20,6 +20,8 @@ companies
     └── leave_balances     (company_id FK)
     └── shift_schedules    (company_id FK)
     └── company_policies   (company_id FK)
+    └── timesheets         (company_id FK)
+    └── payroll_exports    (company_id FK)
 
 users
     └── user_roles         (user_id FK)
@@ -31,6 +33,8 @@ users
     └── leave_balances     (employee_id FK)
     └── shift_schedules    (employee_id / created_by FK)
     └── company_policies   (updated_by FK)
+    └── timesheets         (employee_id / approved_by FK)
+    └── payroll_exports    (exported_by FK)
 
 roles
     └── user_roles         (role_id FK)
@@ -38,6 +42,9 @@ roles
 time_entries
     └── time_corrections   (time_entry_id FK)
     └── attendance_records (time_entry_id FK)
+
+timesheets
+    └── payroll_line_items (timesheet_id FK)
 ```
 
 ---
@@ -338,6 +345,83 @@ time_entries
 
 ---
 
+## Table: `timesheets`
+
+**Model:** `app/models/timesheet.py` → `Timesheet`
+
+| Column | Type | Constraints | Default |
+|---|---|---|---|
+| `id` | `VARCHAR(36)` | PK | `uuid4()` |
+| `employee_id` | `VARCHAR(36)` | FK → `users.id` CASCADE, INDEX | — |
+| `company_id` | `VARCHAR(36)` | FK → `companies.id` CASCADE, INDEX | — |
+| `pay_period_start` | `DATE` | NOT NULL | — |
+| `pay_period_end` | `DATE` | NOT NULL | — |
+| `status` | `VARCHAR(16)` | NOT NULL | `"draft"` |
+| `total_regular_hrs` | `FLOAT` | NOT NULL | `0.0` |
+| `total_ot_hrs` | `FLOAT` | NOT NULL | `0.0` |
+| `total_holiday_hrs` | `FLOAT` | NOT NULL | `0.0` |
+| `total_differential_hrs` | `FLOAT` | NOT NULL | `0.0` |
+| `submitted_at` | `DATETIME` | nullable | — |
+| `approved_by` | `VARCHAR(36)` | FK → `users.id` SET NULL, nullable | — |
+| `approved_at` | `DATETIME` | nullable | — |
+| `created_at` | `DATETIME` | NOT NULL | `utcnow()` |
+
+**Status values:** `draft` → `submitted` → `approved` → `exported`
+
+**Relationships:**
+- `employee` → many-to-one → `User`
+- `approver` → many-to-one → `User` (nullable)
+- `company` → many-to-one → `Company`
+- `line_items` → one-to-many → `PayrollLineItem` (cascade delete-orphan)
+
+---
+
+## Table: `payroll_line_items`
+
+**Model:** `app/models/payroll_line_item.py` → `PayrollLineItem`
+
+| Column | Type | Constraints | Default |
+|---|---|---|---|
+| `id` | `VARCHAR(36)` | PK | `uuid4()` |
+| `timesheet_id` | `VARCHAR(36)` | FK → `timesheets.id` CASCADE, INDEX | — |
+| `entry_date` | `DATE` | NOT NULL | — |
+| `hours_worked` | `FLOAT` | NOT NULL | — |
+| `rate_type` | `VARCHAR(32)` | NOT NULL | — |
+| `rate_multiplier` | `FLOAT` | NOT NULL | `1.0` |
+| `notes` | `TEXT` | nullable | — |
+| `created_at` | `DATETIME` | NOT NULL | `utcnow()` |
+
+**Rate type values:** `regular`, `overtime`, `double_time`, `holiday`, `night_differential`, `pto`, `sick`, `comp`
+
+**Relationships:**
+- `timesheet` → many-to-one → `Timesheet`
+
+---
+
+## Table: `payroll_exports`
+
+**Model:** `app/models/payroll_export.py` → `PayrollExport`
+
+| Column | Type | Constraints | Default |
+|---|---|---|---|
+| `id` | `VARCHAR(36)` | PK | `uuid4()` |
+| `company_id` | `VARCHAR(36)` | FK → `companies.id` CASCADE, INDEX | — |
+| `pay_period_start` | `DATE` | NOT NULL | — |
+| `pay_period_end` | `DATE` | NOT NULL | — |
+| `exported_at` | `DATETIME` | NOT NULL | `utcnow()` |
+| `exported_by` | `VARCHAR(36)` | FK → `users.id` SET NULL, nullable | — |
+| `export_format` | `VARCHAR(8)` | NOT NULL | `"csv"` |
+| `record_count` | `INTEGER` | NOT NULL | `0` |
+| `file_name` | `VARCHAR(255)` | NOT NULL | — |
+
+**Export format values:** `csv`, `json`
+
+**Relationships:**
+- `company` → many-to-one → `Company`
+- `exporter` → many-to-one → `User` (nullable)
+
+---
+
 ## System Tables
 
 | Table | Purpose |
@@ -392,4 +476,4 @@ python scripts/seed.py --reset --email you@example.com
 | Sprint 1 (patch) | Added address fields to `locations`: `address_line_1`, `city`, `state`, `zip_code`, `country` |
 | Sprint 2 | `time_entries`, `time_corrections`, `attendance_records`, `audit_logs` — time management and punching |
 | Sprint 3 | `leave_requests`, `leave_balances`, `shift_schedules`, `company_policies` — scheduling and leave management |
-| Sprint 4 | _(planned)_ `timesheets`, `payroll_line_items`, `payroll_exports` |
+| Sprint 4 | `timesheets`, `payroll_line_items`, `payroll_exports` — payroll calculation, timesheets, and exports |

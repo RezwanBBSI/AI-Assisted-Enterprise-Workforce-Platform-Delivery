@@ -4,7 +4,7 @@
 > **Base URL (dev):** `http://localhost:8000/api/v1`
 > **Swagger UI:** `http://localhost:8000/docs`
 > **ReDoc:** `http://localhost:8000/redoc`
-> **Last Updated:** Sprint 3 (2026-05-15)
+> **Last Updated:** Sprint 4 (2026-05-18)
 
 ---
 
@@ -766,6 +766,163 @@ Create or update a policy value (upsert).
 
 ---
 
+## Timesheets — `/api/v1/timesheets`
+
+### `POST /timesheets/generate` 🔒 Admin | Manager
+
+Auto-generate a timesheet from closed time entries and approved leave requests for a pay period.
+
+**Request body:**
+```json
+{
+  "employee_id": "uuid",
+  "company_id": "uuid",
+  "pay_period_start": "2026-05-11",
+  "pay_period_end": "2026-05-17"
+}
+```
+
+**Response `201`:** `TimesheetResponse` (see schema below)
+
+**Errors:**
+| Code | Reason |
+|---|---|
+| `403` | Employee role cannot generate timesheets |
+| `422` | Invalid pay period (end < start) |
+
+---
+
+### `GET /timesheets` 🔒 Any
+
+List timesheets. Employees see only their own; managers see all.
+
+**Query parameters:**
+| Param | Type | Notes |
+|---|---|---|
+| `employee_id` | string | Filter by employee UUID |
+| `company_id` | string | Filter by company UUID |
+| `pay_period_start` | date | Filter from this date |
+| `pay_period_end` | date | Filter to this date |
+| `status` | string | `draft`/`submitted`/`approved`/`exported` |
+| `page` | int | Default 1 |
+| `size` | int | Default 20 |
+
+**Response `200`:** `PaginatedResponse[TimesheetResponse]`
+
+---
+
+### `GET /timesheets/{timesheet_id}` 🔒 Any
+
+Get a single timesheet with all line items. Employees can only view their own.
+
+**Response `200`:** `TimesheetResponse` with nested `line_items` array.
+
+**Errors:**
+| Code | Reason |
+|---|---|
+| `403` | Employee accessing another employee's timesheet |
+| `404` | Timesheet not found |
+
+---
+
+### `PUT /timesheets/{timesheet_id}/submit` 🔒 Any
+
+Employee submits a draft timesheet for manager approval.
+
+**Response `200`:** updated `TimesheetResponse` with `status = "submitted"`
+
+**Errors:**
+| Code | Reason |
+|---|---|
+| `403` | Employee submitting another employee's timesheet |
+| `409` | Timesheet is not in `draft` status |
+
+---
+
+### `PUT /timesheets/{timesheet_id}/approve` 🔒 Admin | Manager
+
+Manager approves a submitted timesheet.
+
+**Response `200`:** updated `TimesheetResponse` with `status = "approved"`
+
+**Errors:**
+| Code | Reason |
+|---|---|
+| `409` | Timesheet is not in `submitted` status |
+
+---
+
+### `POST /timesheets/{timesheet_id}/export` 🔒 Admin | Manager
+
+Export an approved timesheet as CSV or JSON.
+
+**Request body:**
+```json
+{ "export_format": "csv" }
+```
+> `export_format` must be `"csv"` or `"json"`.
+
+**Response `200`:** `ExportDownloadResponse`
+```json
+{
+  "export": {
+    "id": "uuid",
+    "company_id": "uuid",
+    "pay_period_start": "2026-05-11",
+    "pay_period_end": "2026-05-17",
+    "exported_at": "2026-05-18T10:00:00Z",
+    "exported_by": "uuid",
+    "export_format": "csv",
+    "record_count": 5,
+    "file_name": "timesheet_<id>.csv"
+  },
+  "content": "date,hours_worked,rate_type,rate_multiplier\n..."
+}
+```
+
+**Errors:**
+| Code | Reason |
+|---|---|
+| `409` | Timesheet is not in `approved` status |
+| `422` | Invalid `export_format` value |
+
+---
+
+### `TimesheetResponse` Schema
+
+```json
+{
+  "id": "uuid",
+  "employee_id": "uuid",
+  "company_id": "uuid",
+  "pay_period_start": "2026-05-11",
+  "pay_period_end": "2026-05-17",
+  "status": "draft",
+  "total_regular_hrs": 32.0,
+  "total_ot_hrs": 4.5,
+  "total_holiday_hrs": 0.0,
+  "total_differential_hrs": 8.0,
+  "submitted_at": null,
+  "approved_by": null,
+  "approved_at": null,
+  "created_at": "2026-05-18T09:00:00Z",
+  "line_items": [
+    {
+      "id": "uuid",
+      "timesheet_id": "uuid",
+      "entry_date": "2026-05-11",
+      "hours_worked": 8.0,
+      "rate_type": "regular",
+      "rate_multiplier": 1.0,
+      "notes": null,
+      "created_at": "2026-05-18T09:00:00Z"
+    }
+  ]
+}
+```
+
+---
+
 ## Common Error Responses
 
 | Code | Meaning |
@@ -778,11 +935,10 @@ Create or update a policy value (upsert).
 
 ---
 
-## Upcoming Endpoints (Sprint 4+)
+## Upcoming Endpoints (Sprint 5+)
 
 | Sprint | Endpoints |
-|---|---|
-| Sprint 4 | Timesheets, payroll line items, payroll exports, overtime calculations |
+|---|---------|
 | Sprint 5 | Compliance violations, audit trail reports, operational reports |
 
 > This file is updated at the end of each sprint. See `docs/roadmap.md` for full sprint specs.

@@ -10,6 +10,7 @@ from app.api.v1.endpoints import locations
 from app.api.v1.endpoints import policies
 from app.api.v1.endpoints import schedules
 from app.api.v1.endpoints import time_entries
+from app.api.v1.endpoints import timesheets
 
 api_router = APIRouter()
 api_router.include_router(health.router, prefix="/health", tags=["health"])
@@ -23,3 +24,4 @@ api_router.include_router(leave_requests.router, prefix="/leave-requests", tags=
 api_router.include_router(leave_balances.router, prefix="/leave-balances", tags=["leave-balances"])
 api_router.include_router(schedules.router, prefix="/schedules", tags=["schedules"])
 api_router.include_router(policies.router, prefix="/policies", tags=["policies"])
+api_router.include_router(timesheets.router, prefix="/timesheets", tags=["timesheets"])

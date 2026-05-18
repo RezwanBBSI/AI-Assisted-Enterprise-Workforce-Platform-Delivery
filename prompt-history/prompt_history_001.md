@@ -343,3 +343,57 @@ Full Sprint 3 backend implementation for scheduling, leave management, and compa
 Committed as: `feat(backend): Sprint 3 — scheduling, leave management, policies, and tests`
 
 ---
+
+## Prompt 017 — 2026-05-18 | Sprint 4 — Payroll & Compensation
+
+**Agent:** GitHub Copilot
+**Model:** Claude Sonnet 4.6
+
+**Summary:**
+Full Sprint 4 backend implementation for payroll calculation, timesheet management, and payroll exports. All models, services, endpoints, migration, tests, frontend components, and docs completed. 131 total tests passing (35 new).
+
+**Delivered:**
+
+**DB Models (3 new tables):**
+- **`app/models/timesheet.py`** — `Timesheet`: one per employee per pay period with status workflow (`draft`/`submitted`/`approved`/`exported`), aggregate hour totals (regular, OT, holiday, differential), submitted_at, approved_by FK (nullable).
+- **`app/models/payroll_line_item.py`** — `PayrollLineItem`: individual pay line items linked to a timesheet; `rate_type` enum: `regular`/`overtime`/`double_time`/`holiday`/`night_differential`/`pto`/`sick`/`comp`; `rate_multiplier` float.
+- **`app/models/payroll_export.py`** — `PayrollExport`: tracks export records with format (`csv`/`json`), record_count, file_name, exported_by FK.
+- **`app/models/__init__.py`** — Updated to import all 3 new models.
+
+**Schemas:**
+- **`app/schemas/payroll.py`** — `TimesheetGenerateRequest`, `PayrollLineItemResponse`, `TimesheetResponse` (with nested `line_items`), `ExportRequest`, `PayrollExportResponse`, `ExportDownloadResponse`.
+
+**Services:**
+- **`app/services/payroll_calculation_service.py`** — Stateless `PayrollCalculationService`. Implements: `_overlap_hours()` for night window crossing midnight; `_classify_daily()` for daily OT/double-time thresholds; `_split_night_differential()` for window overlap; `_apply_weekly_ot()` with correct weekly-OT redistribution; `_apply_holiday()` for holiday overrides; `_build_leave_items()` for approved leave; `calculate()` orchestrating all rules. Policy keys: `ot_daily_threshold`, `ot_double_threshold`, `weekly_ot_threshold`, `holiday_dates`, `night_diff_start`, `night_diff_end`, `bank_comp_time`.
+- **`app/services/payroll_service.py`** — `TimesheetService`: `generate()` (fetches closed TimeEntries + approved LeaveRequests + CompanyPolicy rows, creates Timesheet + PayrollLineItem rows, writes AuditLog); `list_timesheets()` (selectinload line_items); `get_timesheet()` (selectinload); `submit()` (403 if not owner, 409 if not draft); `approve()` (409 if not submitted); `export()` (409 if not approved, 422 if bad format; builds CSV or JSON, creates PayrollExport).
+
+**API Endpoints:**
+- **`app/api/v1/endpoints/timesheets.py`** — 6 routes: `POST /timesheets/generate` (201, Manager/Admin), `GET /timesheets` (paginated, employees see own), `GET /timesheets/{id}`, `PUT /timesheets/{id}/submit`, `PUT /timesheets/{id}/approve` (Manager/Admin), `POST /timesheets/{id}/export` (Manager/Admin) → `ExportDownloadResponse`.
+- **`app/api/v1/router.py`** — Registered `timesheets` router at prefix `/timesheets`.
+
+**Migration:**
+- **`alembic/versions/3f7a91c4d82e_sprint_4_payroll_tables.py`** — Creates `timesheets`, `payroll_line_items`, `payroll_exports` with indexes. `down_revision = '18d82f8dca79'`.
+
+**Tests (35 new, 131 total, all passing):**
+- **`tests/sprint4_helpers.py`** — `_seed_sprint4()`: builds on `_seed_sprint3`, seeds 4 closed TimeEntry rows (normal 8hr, daily OT 10hr, double-time 14hr, night shift 22:00–06:00), payroll policies, approved PTO leave, pay period 2026-05-11–17.
+- **`tests/test_payroll_calculation.py`** — 18 unit tests covering all `PayrollCalculationService` branches: overlap hours, daily classification, weekly OT threshold, holiday multiplier, night differential, leave items, open entry skip, comp-time banking, invalid policy defaults.
+- **`tests/test_timesheets.py`** — 17 integration tests: generate (manager OK / employee 403 / unauth 401 / invalid period 422), list/get (employee sees own / manager sees all / employee 403 other's / 404), submit (OK / double-submit 409 / 403 other's), approve (OK / non-submitted 409 / employee 403), export (CSV / JSON / invalid format 422 / unapproved 409).
+
+**Frontend components (3 new files):**
+- **`frontend/src/components/PayPeriodSummaryCard.jsx`** — Summary card showing Regular/OT/Holiday/Night Diff hours from a timesheet object.
+- **`frontend/src/components/TimesheetPage.jsx`** — Full timesheet view with line items table and Submit button (employees only, draft status).
+- **`frontend/src/components/PayrollExportPage.jsx`** — Format selector (csv/json), Generate Export button, downloads result via Blob URL.
+
+**Bug fixes:**
+- **Bug 1 — Weekly OT over-accumulation:** In `_apply_weekly_ot`, daily-OT items were incrementing `weekly_total`, causing the weekly 40-hr threshold to be hit early (36 regular instead of 40 for 5×9hr days). Fix: OT-typed items pass through without updating `weekly_total`.
+- **Bug 2 — MissingGreenlet in list endpoint:** `list_timesheets` returned Timesheet objects without eager-loading `line_items`. Pydantic serialization triggered lazy async load outside greenlet context. Fix: added `selectinload(Timesheet.line_items)` to the query.
+
+**Docs updated:**
+- **`docs/database-schema.md`** — Added 3 new table sections (timesheets, payroll_line_items, payroll_exports); updated overview tree; updated migration head to `3f7a91c4d82e`; Sprint 4 marked complete in changelog.
+- **`docs/api-reference.md`** — Added full Timesheets section (6 endpoints + `TimesheetResponse` schema); removed Sprint 4 from "Upcoming Endpoints"; updated header to Sprint 4.
+- **`docs/roadmap.md`** — Sprint 4 marked ✅ COMPLETE with all criteria checked; current sprint updated to Sprint 5; ASCII diagram updated; Current Status table updated with Sprint 4 row.
+- **`docs/requirement-traceability.md`** — REQ-101 through REQ-109, REQ-201 through REQ-207, REQ-301 through REQ-308, REQ-601 through REQ-605, REQ-701/702/704 all marked Complete; summary table updated (32 of 44 complete).
+
+Committed as: `feat(backend): Sprint 4 — payroll calculation, timesheets, exports, and tests`
+
+---
