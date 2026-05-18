@@ -13,5 +13,6 @@ from app.models.shift_schedule import ShiftSchedule  # noqa: F401
 from app.models.time_correction import TimeCorrection  # noqa: F401
 from app.models.time_entry import TimeEntry  # noqa: F401
 from app.models.timesheet import Timesheet  # noqa: F401
+from app.models.compliance_violation import ComplianceViolation  # noqa: F401
 from app.models.user import User  # noqa: F401
 from app.models.user_role import UserRole  # noqa: F401

@@ -4,7 +4,7 @@
 > **Base URL (dev):** `http://localhost:8000/api/v1`
 > **Swagger UI:** `http://localhost:8000/docs`
 > **ReDoc:** `http://localhost:8000/redoc`
-> **Last Updated:** Sprint 4 (2026-05-18)
+> **Last Updated:** Sprint 5 (2026-06-15)
 
 ---
 
@@ -923,6 +923,87 @@ Export an approved timesheet as CSV or JSON.
 
 ---
 
+## Compliance — `/api/v1/compliance`
+
+### `POST /compliance/validate` 🔒 Admin | Manager
+
+Run all labor-rule checks for a company and pay period. Creates `ComplianceViolation` records for any failures found.
+
+**Request body:**
+```json
+{
+  "company_id": "uuid",
+  "pay_period_start": "2026-06-01",
+  "pay_period_end": "2026-06-07"
+}
+```
+
+**Response `200`:** `ComplianceRunResult` — violations found and created.
+
+**Violation types:** `missing_punch` | `min_wage` | `max_hours` | `mandatory_break` | `ot_threshold`
+
+---
+
+### `GET /compliance/violations` 🔒 Admin | Manager
+
+Paginated list. Query params: `company_id` (required), `employee_id`, `violation_type`, `resolved`, `page`, `size`.
+
+**Response `200`:** `PaginatedResponse` with `ComplianceViolationResponse` items.
+
+---
+
+### `PUT /compliance/violations/{violation_id}` 🔒 Admin | Manager
+
+Mark a violation as resolved.
+
+**Request body:** `{ "resolution_notes": "string" }`
+
+**Errors:** `404` not found · `409` already resolved
+
+---
+
+## Reports — `/api/v1/reports`
+
+### `GET /reports/compliance` 🔒 Admin | Manager
+
+Aggregated compliance summary. Query params: `company_id`, `pay_period_start`, `pay_period_end`.
+
+**Response `200`:** `ComplianceReportResponse` — `total_violations`, `unresolved`, `by_type` dict, full violation list.
+
+---
+
+### `GET /reports/attendance-exceptions` 🔒 Admin | Manager
+
+Attendance records with status ≠ `present`. Query params: `company_id`, `start_date`, `end_date`.
+
+**Response `200`:** `AttendanceExceptionsResponse` — `total`, `items` list.
+
+---
+
+### `GET /reports/audit-trail` 🔒 Admin only
+
+Paginated immutable audit log (append-only, no writes). Query params: `entity_type`, `start_date`, `end_date`, `page`, `size`. Ordered by `performed_at DESC`.
+
+**Response `200`:** `PaginatedResponse` with `AuditTrailItem` items.
+
+---
+
+### `GET /reports/operational` 🔒 Admin | Manager
+
+Workforce summary for a pay period. Query params: `company_id`, `pay_period_start`, `pay_period_end`.
+
+**Response `200`:** `OperationalReportResponse` — `total_employees`, `total_regular_hrs`, `total_ot_hrs`, `total_absences`, `total_late_arrivals`.
+
+---
+
+### `GET /reports/crosscheck` 🔒 Admin | Manager
+
+Compare scheduled shifts vs. time entries; flag `no_time_entry` or `hours_mismatch` (> 30 min gap). Query params: `company_id`, `pay_period_start`, `pay_period_end`.
+
+**Response `200`:** `CrossCheckResponse` — `total_discrepancies`, `entries` list.
+
+---
+
 ## Common Error Responses
 
 | Code | Meaning |
@@ -934,11 +1015,5 @@ Export an approved timesheet as CSV or JSON.
 | `422 Unprocessable Entity` | Request body failed validation or business rule (break minimum, over-balance, etc.) |
 
 ---
-
-## Upcoming Endpoints (Sprint 5+)
-
-| Sprint | Endpoints |
-|---|---------|
-| Sprint 5 | Compliance violations, audit trail reports, operational reports |
 
 > This file is updated at the end of each sprint. See `docs/roadmap.md` for full sprint specs.

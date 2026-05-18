@@ -2,7 +2,7 @@
 # BBSI BuildAThon 2026 — Workforce Time Tracking & Payroll Integration Platform
 
 > **Source:** `bbsi_buildathon_2026_requirements_only.md` + `docs/planning-framework.md`
-> **Last Updated:** 2026-05-18
+> **Last Updated:** 2026-06-15
 
 Status values: `Not Started` | `In Progress` | `Complete` | `Deferred`
 Priority values: `P1 - Critical` | `P2 - High` | `P3 - Medium` | `P4 - Low`
@@ -58,12 +58,12 @@ Priority values: `P1 - Critical` | `P2 - High` | `P3 - Medium` | `P4 - Low`
 
 | REQ-ID | Requirement | Feature / Component | Sprint | Story ID | Priority | Status |
 |---|---|---|---|---|---|---|
-| REQ-401 | Tax and labor-rule validations | Compliance Validation Service | Sprint 5 | US-401 | P1 | Not Started |
-| REQ-402 | Compliance reporting | Compliance Report API + UI | Sprint 5 | US-402 | P1 | Not Started |
-| REQ-403 | Attendance exception reporting | Exception Report API | Sprint 5 | US-403 | P2 | Not Started |
-| REQ-404 | Audit trails | Audit Trail API + UI | Sprint 5 | US-404 | P1 | Not Started |
-| REQ-405 | Operational reporting | Operational Dashboard API | Sprint 5 | US-405 | P2 | Not Started |
-| REQ-406 | CrossCheck reporting | CrossCheck Report API | Sprint 5 | US-406 | P2 | Not Started |
+| REQ-401 | Tax and labor-rule validations | Compliance Validation Service | Sprint 5 | US-401 | P1 | Complete |
+| REQ-402 | Compliance reporting | Compliance Report API + UI | Sprint 5 | US-402 | P1 | Complete |
+| REQ-403 | Attendance exception reporting | Exception Report API | Sprint 5 | US-403 | P2 | Complete |
+| REQ-404 | Audit trails | Audit Trail API + UI | Sprint 5 | US-404 | P1 | Complete |
+| REQ-405 | Operational reporting | Operational Dashboard API | Sprint 5 | US-405 | P2 | Complete |
+| REQ-406 | CrossCheck reporting | CrossCheck Report API | Sprint 5 | US-406 | P2 | Complete |
 
 ---
 

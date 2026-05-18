@@ -397,3 +397,53 @@ Full Sprint 4 backend implementation for payroll calculation, timesheet manageme
 Committed as: `feat(backend): Sprint 4 — payroll calculation, timesheets, exports, and tests`
 
 ---
+
+## Prompt 018 — 2026-06-15 | Sprint 5 — Compliance & Reporting
+
+**Agent:** GitHub Copilot
+**Model:** Claude Sonnet 4.6
+
+**Summary:**
+Full Sprint 5 backend and frontend implementation for labor-rule compliance validation, violation management, and operational reporting. All models, schemas, services, endpoints, migration, tests, and frontend components completed. 160 total tests passing (29 new).
+
+**Delivered:**
+
+**DB Models (1 new table):**
+- **`app/models/compliance_violation.py`** — `ComplianceViolation`: tracks labor-rule violations with `violation_type` (`missing_punch`/`min_wage`/`max_hours`/`mandatory_break`/`ot_threshold`), `description`, `occurred_at`, `resolved` bool, `resolved_at`/`resolved_by`/`resolution_notes` for the resolution workflow. Indexed on `employee_id`, `company_id`, `violation_type`. FKs: `employee_id` → users (CASCADE), `company_id` → companies (CASCADE), `resolved_by` → users (SET NULL).
+- **`app/models/__init__.py`** — Added `ComplianceViolation` import.
+
+**Schemas:**
+- **`app/schemas/compliance.py`** — `ComplianceRunRequest`, `ComplianceViolationResponse`, `ViolationResolveRequest`, `ComplianceRunResult`; report schemas: `ComplianceReportResponse`, `AttendanceExceptionItem`, `AttendanceExceptionsResponse`, `AuditTrailItem`, `OperationalReportResponse`, `CrossCheckEntry`, `CrossCheckResponse`.
+
+**Services:**
+- **`app/services/compliance_service.py`** — Stateless `ComplianceValidationService` with 4 rule methods (100% branch coverage): `check_missing_punch()` (open entries past period end), `check_max_hours()` (total hrs > policy `max_hours_per_week`, default 60), `check_mandatory_break()` (shift > 6 hrs with `break_minutes=0`; handles overnight shifts and `datetime` vs `date` shift_date), `check_ot_threshold()` (OT hrs > `ot_alert_threshold`, skips if threshold ≤ 0). Async `ComplianceService`: `run_validation()` (loads policies/entries/timesheets/shifts, runs all 4 checks, persists violations, writes AuditLog), `list_violations()` (paginated with company/employee/type/resolved filters), `resolve()` (404 if not found, 409 if already resolved, writes AuditLog).
+- **`app/services/report_service.py`** — `ReportService` with 5 async methods: `compliance_report()` (aggregate violations by type), `attendance_exceptions()` (status ≠ "present"), `audit_trail()` (paginated, ordered by `performed_at DESC`, filterable by entity_type and date range), `operational_report()` (sum regular/OT hrs, count unique employees, count absences/late arrivals), `crosscheck()` (shift vs. entry map, flags `no_time_entry` or `hours_mismatch` > 0.5 hrs).
+
+**API Endpoints:**
+- **`app/api/v1/endpoints/compliance.py`** — 3 routes: `POST /compliance/validate` (Manager/Admin → `ComplianceRunResult`), `GET /compliance/violations` (paginated, Manager/Admin), `PUT /compliance/violations/{id}` (Manager/Admin, resolve workflow).
+- **`app/api/v1/endpoints/reports.py`** — 5 routes: `GET /reports/compliance`, `GET /reports/attendance-exceptions`, `GET /reports/audit-trail` (Admin only), `GET /reports/operational`, `GET /reports/crosscheck`.
+- **`app/api/v1/router.py`** — Registered `compliance` and `reports` routers.
+
+**Migration:**
+- **`alembic/versions/b7e3f9a2c851_sprint_5_compliance.py`** — Creates `compliance_violations` table with 3 indexes. `down_revision = '3f7a91c4d82e'`.
+
+**Tests (29 new, 160 total, all passing):**
+- **`tests/sprint5_helpers.py`** — `_seed_sprint5()`: extends `_seed_sprint4` with pay period 2026-06-01–07. Seeds: open TimeEntry (→ `missing_punch`), 9hr ShiftSchedule with 0 break (→ `mandatory_break`), 6hr shift with 0 break (→ no violation), AttendanceRecord `absent`, AttendanceRecord `late`, AttendanceRecord `present`, closed TimeEntry matching long shift but only 4 hrs (→ `hours_mismatch`).
+- **`tests/test_compliance.py`** — 13 tests: validate finds missing_punch, finds mandatory_break, empty period = 0 violations, employee 403, unauth 401; list all, filter by type, filter by resolved=false, employee 403; resolve OK, double-resolve 409, nonexistent 404, employee 403.
+- **`tests/test_reports.py`** — 16 tests: compliance report happy path, empty period, employee 403; attendance exceptions happy path (2 items), empty, employee 403; audit trail admin OK, manager 403, filter by entity_type; operational happy path, empty, employee 403; crosscheck with mismatch, no discrepancy, empty period, employee 403.
+
+**Frontend components (4 new files):**
+- **`frontend/src/components/ComplianceDashboard.jsx`** — Summary stat cards (total/unresolved/resolved) + by-type breakdown table. Fetches `GET /reports/compliance`.
+- **`frontend/src/components/ViolationsTable.jsx`** — Paginated violations table with type/description/occurred_at/status; Resolve button with inline notes input. Fetches `GET /compliance/violations`, `PUT /compliance/violations/{id}`.
+- **`frontend/src/components/AuditTrailViewer.jsx`** — Paginated audit log table (Admin only) with `entity_type`, date range filters. Fetches `GET /reports/audit-trail`.
+- **`frontend/src/components/OperationalReport.jsx`** — Metrics table (employees, regular hrs, OT hrs, total hrs, absences, late arrivals) with OT percentage bar. Fetches `GET /reports/operational`.
+
+**Docs updated:**
+- **`docs/roadmap.md`** — Sprint 5 marked ✅ COMPLETE with all criteria checked; current sprint updated to Sprint 6; ASCII diagram updated; Current Status table updated with Sprint 5 row.
+- **`docs/api-reference.md`** — Added full Compliance (3 endpoints) and Reports (5 endpoints) sections; removed "Upcoming Endpoints" stub; updated header to Sprint 5.
+- **`docs/database-schema.md`** — Added `compliance_violations` table section; updated migration head to `b7e3f9a2c851`; Sprint 5 added to changelog.
+- **`docs/requirement-traceability.md`** — REQ-401 through REQ-406 all marked Complete; updated Last Updated date.
+
+Committed as: `feat(backend): Sprint 5 — compliance validation, reports, and tests`
+
+---

@@ -2,8 +2,8 @@
 # BBSI BuildAThon 2026 — Workforce Platform
 
 > **Auto-generated from:** `backend/app/models/`
-> **Last Updated:** Sprint 4 (2026-05-18)
-> **Current migration head:** `alembic/versions/3f7a91c4d82e_sprint_4_payroll_tables.py`
+> **Last Updated:** Sprint 5 (2026-06-15)
+> **Current migration head:** `alembic/versions/b7e3f9a2c851_sprint_5_compliance.py`
 > **Apply:** `cd backend && alembic upgrade head`
 
 ---
@@ -35,6 +35,7 @@ users
     └── company_policies   (updated_by FK)
     └── timesheets         (employee_id / approved_by FK)
     └── payroll_exports    (exported_by FK)
+    └── compliance_violations (employee_id / resolved_by FK)
 
 roles
     └── user_roles         (role_id FK)
@@ -422,6 +423,36 @@ timesheets
 
 ---
 
+## Table: `compliance_violations`
+
+**Model:** `app/models/compliance_violation.py` → `ComplianceViolation`
+**Migration:** `alembic/versions/b7e3f9a2c851_sprint_5_compliance.py`
+
+| Column | Type | Constraints | Default |
+|---|---|---|---|
+| `id` | `VARCHAR(36)` | PK | `uuid4()` |
+| `employee_id` | `VARCHAR(36)` | FK → `users.id` CASCADE, INDEX | — |
+| `company_id` | `VARCHAR(36)` | FK → `companies.id` CASCADE, INDEX | — |
+| `violation_type` | `VARCHAR(32)` | NOT NULL, INDEX | — |
+| `description` | `TEXT` | NOT NULL | — |
+| `occurred_at` | `DATETIME` | NOT NULL | — |
+| `resolved` | `BOOLEAN` | NOT NULL | `False` |
+| `resolved_at` | `DATETIME` | nullable | — |
+| `resolved_by` | `VARCHAR(36)` | FK → `users.id` SET NULL, nullable | — |
+| `resolution_notes` | `TEXT` | nullable | — |
+| `created_at` | `DATETIME` | NOT NULL | `utcnow()` |
+
+**Violation type values:** `missing_punch` · `min_wage` · `max_hours` · `mandatory_break` · `ot_threshold`
+
+**Indexes:** `ix_compliance_violations_employee_id`, `ix_compliance_violations_company_id`, `ix_compliance_violations_violation_type`
+
+**Relationships:**
+- `employee` → many-to-one → `User` (foreign_keys: employee_id)
+- `resolver` → many-to-one → `User` nullable (foreign_keys: resolved_by)
+- `company` → many-to-one → `Company`
+
+---
+
 ## System Tables
 
 | Table | Purpose |
@@ -477,3 +508,4 @@ python scripts/seed.py --reset --email you@example.com
 | Sprint 2 | `time_entries`, `time_corrections`, `attendance_records`, `audit_logs` — time management and punching |
 | Sprint 3 | `leave_requests`, `leave_balances`, `shift_schedules`, `company_policies` — scheduling and leave management |
 | Sprint 4 | `timesheets`, `payroll_line_items`, `payroll_exports` — payroll calculation, timesheets, and exports |
+| Sprint 5 | `compliance_violations` — labor-rule compliance tracking, violation resolution, and reporting |
