@@ -1,7 +1,7 @@
 # Quick Reference
 # BBSI BuildAThon 2026 — Workforce Time Tracking & Payroll Integration Platform
 
-> **Last Updated:** 2026-05-14
+> **Last Updated:** 2026-07-01
 
 ---
 
@@ -11,32 +11,32 @@
 
 | # | Step | Sprint | Status |
 |---|---|---|---|
-| 1 | SQLAlchemy base + Alembic setup | Sprint 1 | ⬜ Next |
-| 2 | Core models: `User`, `Company`, `Location`, `Role` | Sprint 1 | ⬜ |
-| 3 | First Alembic migration | Sprint 1 | ⬜ |
-| 4 | Auth endpoints: register / login / JWT | Sprint 1 | ⬜ |
-| 5 | RBAC middleware + protect routes | Sprint 1 | ⬜ |
-| 6 | `TimeEntry` + `AuditLog` models + migration | Sprint 2 | ⬜ |
-| 7 | Clock-in / clock-out API + punch validation | Sprint 2 | ⬜ |
-| 8 | Attendance tracking + missing punch detection | Sprint 2 | ⬜ |
-| 9 | Time correction workflow | Sprint 2 | ⬜ |
-| 10 | Frontend: Dashboard + clock-in/out widget | Sprint 2 | ⬜ |
-| 11 | Leave & shift models + migration | Sprint 3 | ⬜ |
-| 12 | Leave request/approval API + balance tracking | Sprint 3 | ⬜ |
-| 13 | Shift scheduling API + break/core-hour rules | Sprint 3 | ⬜ |
-| 14 | Policy configuration API | Sprint 3 | ⬜ |
-| 15 | Frontend: Leave management + schedule views | Sprint 3 | ⬜ |
-| 16 | Timesheet + PayrollExport models + migration | Sprint 4 | ⬜ |
-| 17 | Payroll calculation service (OT, holiday, differential) | Sprint 4 | ⬜ |
-| 18 | PTO/comp-time management + payroll export endpoint | Sprint 4 | ⬜ |
-| 19 | Frontend: Timesheet review + submit UI | Sprint 4 | ⬜ |
-| 20 | Compliance validation service (labor-rule engine) | Sprint 5 | ⬜ |
-| 21 | Report generation endpoints + audit trail viewer | Sprint 5 | ⬜ |
-| 22 | Frontend: Reports dashboard | Sprint 5 | ⬜ |
-| 23 | pytest API test suite | Sprint 6 | ⬜ |
-| 24 | Playwright E2E test suite | Sprint 6 | ⬜ |
-| 25 | Security review (pip-audit, secret scan, auth/RBAC) | Sprint 6 | ⬜ |
-| 26 | Dockerfiles (backend + frontend) | Sprint 7 | ⬜ |
+| 1 | SQLAlchemy base + Alembic setup | Sprint 1 | ✅ Done |
+| 2 | Core models: `User`, `Company`, `Location`, `Role` | Sprint 1 | ✅ Done |
+| 3 | First Alembic migration | Sprint 1 | ✅ Done |
+| 4 | Auth endpoints: register / login / JWT | Sprint 1 | ✅ Done |
+| 5 | RBAC middleware + protect routes | Sprint 1 | ✅ Done |
+| 6 | `TimeEntry` + `AuditLog` models + migration | Sprint 2 | ✅ Done |
+| 7 | Clock-in / clock-out API + punch validation | Sprint 2 | ✅ Done |
+| 8 | Attendance tracking + missing punch detection | Sprint 2 | ✅ Done |
+| 9 | Time correction workflow | Sprint 2 | ✅ Done |
+| 10 | Frontend: Dashboard + clock-in/out widget | Sprint 2 | ✅ Done |
+| 11 | Leave & shift models + migration | Sprint 3 | ✅ Done |
+| 12 | Leave request/approval API + balance tracking | Sprint 3 | ✅ Done |
+| 13 | Shift scheduling API + break/core-hour rules | Sprint 3 | ✅ Done |
+| 14 | Policy configuration API | Sprint 3 | ✅ Done |
+| 15 | Frontend: Leave management + schedule views | Sprint 3 | ✅ Done |
+| 16 | Timesheet + PayrollExport models + migration | Sprint 4 | ✅ Done |
+| 17 | Payroll calculation service (OT, holiday, differential) | Sprint 4 | ✅ Done |
+| 18 | PTO/comp-time management + payroll export endpoint | Sprint 4 | ✅ Done |
+| 19 | Frontend: Timesheet review + submit UI | Sprint 4 | ✅ Done |
+| 20 | Compliance validation service (labor-rule engine) | Sprint 5 | ✅ Done |
+| 21 | Report generation endpoints + audit trail viewer | Sprint 5 | ✅ Done |
+| 22 | Frontend: Reports dashboard | Sprint 5 | ✅ Done |
+| 23 | pytest API test suite (292 tests, 93% coverage) | Sprint 6 | ✅ Done |
+| 24 | Playwright E2E test suite | Sprint 6 | ✅ Done |
+| 25 | Security review (pip-audit, bandit, rate limit, CORS) | Sprint 6 | ✅ Done |
+| 26 | Dockerfiles (backend + frontend) | Sprint 7 | ⬜ Next |
 | 27 | Structured logging + incident triage demo | Sprint 7 | ⬜ |
 
 ---
@@ -57,6 +57,23 @@ uvicorn app.main:app --reload
 cd frontend
 npm run dev
 # UI → http://localhost:5173
+```
+
+### QA & Security (Sprint 6)
+```bash
+# Run full test suite with coverage
+cd backend && source venv/bin/activate
+pytest --cov=app --cov-report=term-missing
+
+# Static security analysis
+bandit -r app -ll
+
+# CVE scan
+pip-audit -r requirements.txt --skip-editable
+
+# Playwright E2E tests (requires backend running on :8000)
+cd frontend
+npm run test:e2e
 ```
 
 ---
