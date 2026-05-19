@@ -96,9 +96,9 @@ Priority values: `P1 - Critical` | `P2 - High` | `P3 - Medium` | `P4 - Low`
 |---|---|---|---|---|---|---|
 | REQ-701 | API-first design | OpenAPI / Swagger at `/docs` | Sprint 1 | US-701 | P1 | Complete |
 | REQ-702 | Stateless services | Stateless FastAPI design | Sprint 1 | US-702 | P1 | Complete |
-| REQ-703 | Container-ready architecture | Dockerfile (backend + frontend) | Sprint 7 | US-703 | P3 | Not Started |
+| REQ-703 | Container-ready architecture | Dockerfile (backend + frontend) + docker-compose.yml | Sprint 7 | US-703 | P3 | Complete |
 | REQ-704 | Secure secret management | `.env` + Pydantic Settings | Sprint 1 | US-704 | P1 | Complete |
-| REQ-705 | Observability / logging support | Structured Logging (stdlib/loguru) | Sprint 7 | US-705 | P2 | Not Started |
+| REQ-705 | Observability / logging support | RequestIDLoggingMiddleware — JSON logs + X-Request-ID | Sprint 7 | US-705 | P2 | Complete |
 
 ---
 

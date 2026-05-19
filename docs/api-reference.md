@@ -4,7 +4,56 @@
 > **Base URL (dev):** `http://localhost:8000/api/v1`
 > **Swagger UI:** `http://localhost:8000/docs`
 > **ReDoc:** `http://localhost:8000/redoc`
-> **Last Updated:** Sprint 6 (2026-07-01)
+> **Last Updated:** Sprint 7 (2026-05-19)
+
+---
+
+## Observability (Sprint 7)
+
+### Structured JSON Logging
+
+Every request produces a single JSON log line on the backend's stdout:
+
+```json
+{"timestamp": "2026-05-19T18:42:11Z", "level": "INFO", "request_id": "a3f7c291-...", "user_id": null, "method": "POST", "path": "/api/v1/time-entries/clock-in", "status": 201, "duration_ms": 34.2}
+```
+
+| Field | Notes |
+|---|---|
+| `level` | `INFO` (2xx), `WARNING` (4xx), `ERROR` (5xx) |
+| `request_id` | UUID v4; unique per request |
+| `error` | Present only on 5xx; contains error detail / stack |
+
+### Request ID Header
+
+Every response includes:
+```
+X-Request-ID: <uuid>
+```
+
+This UUID matches the `request_id` field in the corresponding log line, enabling cross-referencing between client error reports and server logs.
+
+### Incident Simulation
+
+```bash
+cd backend && python scripts/simulate_incident.py
+```
+
+See [docs/incident-triage-example.md](incident-triage-example.md) for the full walkthrough.
+
+---
+
+## Deployment (Sprint 7)
+
+### Docker Compose
+
+```bash
+docker-compose up --build
+```
+
+Services: `db` (PostgreSQL 16), `backend` (FastAPI on :8000), `frontend` (nginx on :80).
+
+All services include `HEALTHCHECK` definitions. The backend waits for `db` healthy; the frontend waits for `backend` healthy.
 
 ---
 

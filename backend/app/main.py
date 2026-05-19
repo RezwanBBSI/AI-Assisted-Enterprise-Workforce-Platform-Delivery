@@ -1,4 +1,6 @@
 from contextlib import asynccontextmanager
+import logging
+import logging.config
 
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,10 +10,15 @@ from slowapi.errors import RateLimitExceeded
 from app.core.config import settings
 from app.core.database import engine
 from app.core.limiter import limiter
+from app.core.logging_middleware import RequestIDLoggingMiddleware
 from app.api.v1.router import api_router
 
-# ── Rate limiter ──────────────────────────────────────────────────────────────
-# limiter is defined in app/core/limiter.py to avoid circular imports
+# ── Structured JSON logging setup ─────────────────────────────────────────────
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",  # raw JSON lines; no extra formatting
+)
+logging.getLogger("uvicorn.access").disabled = True  # suppress default access log
 
 
 @asynccontextmanager
@@ -51,6 +58,9 @@ app = FastAPI(
 # ── Attach rate limiter to app state ─────────────────────────────────────────
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# ── Request ID + structured access logging ────────────────────────────────────
+app.add_middleware(RequestIDLoggingMiddleware)
 
 # ── Content-Type enforcement middleware ───────────────────────────────────────
 
