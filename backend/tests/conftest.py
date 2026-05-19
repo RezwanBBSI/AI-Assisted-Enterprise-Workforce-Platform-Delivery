@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from sqlalchemy.pool import StaticPool
 
 from app.core.database import Base, get_db
+from app.core.limiter import limiter
 from app.main import app
 
 # ── In-memory test database ───────────────────────────────────────────────────
@@ -36,6 +37,17 @@ async def setup_db():
     yield
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
+
+
+@pytest.fixture(autouse=True)
+def reset_rate_limiter():
+    """Clear in-memory rate-limit counters between tests so login calls don't
+    accumulate and trigger 429 in unrelated tests."""
+    try:
+        limiter._storage.reset()
+    except Exception:
+        pass
+    yield
 
 
 @pytest_asyncio.fixture

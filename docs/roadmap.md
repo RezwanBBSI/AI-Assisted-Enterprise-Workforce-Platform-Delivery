@@ -2,8 +2,8 @@
 # BBSI BuildAThon 2026 — Workforce Time Tracking & Payroll Integration Platform
 
 > **Source:** `docs/planning-framework.md` + `docs/requirement-traceability.md`
-> **Last Updated:** 2026-06-15
-> **Current Sprint:** Sprint 6 — QA & Security Hardening
+> **Last Updated:** 2026-07-01
+> **Current Sprint:** Sprint 7 — Ops Readiness
 
 ---
 
@@ -15,7 +15,7 @@ The platform is delivered across **7 sprints**, each building on the previous. F
 Sprint 1 ──▶ Sprint 2 ──▶ Sprint 3 ──▶ Sprint 4 ──▶ Sprint 5 ──▶ Sprint 6 ──▶ Sprint 7
 Foundation   Time Mgmt   Scheduling   Payroll      Compliance    QA &         Ops
 ✅ DONE      & Punching  & Leave      & Comp        & Reporting   Security     Readiness
-             ✅ DONE      ✅ DONE       ✅ DONE       ✅ DONE        🔄 CURRENT
+             ✅ DONE      ✅ DONE       ✅ DONE       ✅ DONE        ✅ DONE       🔄 CURRENT
 ```
 
 ---
@@ -41,6 +41,7 @@ Foundation   Time Mgmt   Scheduling   Payroll      Compliance    QA &         Op
 | Sprint 3 — Scheduling & Leave Management | ✅ Done — 96 tests (34 new), 4 new tables, 11 new endpoints |
 | Sprint 4 — Payroll & Compensation | ✅ Done — 131 tests (35 new), 3 new tables, 6 new endpoints |
 | Sprint 5 — Compliance & Reporting | ✅ Done — ~161 tests (30 new), 1 new table, 8 new endpoints |
+| Sprint 6 — QA & Security Hardening | ✅ Done — 292 tests (132 new), 93% coverage, 0 bandit HIGH, 0 CVEs, Playwright E2E |
 
 ---
 

@@ -4,7 +4,47 @@
 > **Base URL (dev):** `http://localhost:8000/api/v1`
 > **Swagger UI:** `http://localhost:8000/docs`
 > **ReDoc:** `http://localhost:8000/redoc`
-> **Last Updated:** Sprint 5 (2026-06-15)
+> **Last Updated:** Sprint 6 (2026-07-01)
+
+---
+
+## Security (Sprint 6)
+
+### Rate Limiting
+
+`POST /api/v1/auth/login` is rate-limited to **5 requests per 5 minutes** per IP address (using `slowapi`). Exceeding the limit returns:
+
+```
+HTTP 429 Too Many Requests
+```
+
+The key function reads the `X-Real-IP` header first (for reverse-proxy deployments), then falls back to the direct client IP.
+
+### Content-Type Enforcement
+
+All `POST`, `PUT`, and `PATCH` requests to protected API endpoints **must** include the header:
+
+```
+Content-Type: application/json
+```
+
+Requests with any other Content-Type (e.g. `multipart/form-data`, `application/x-www-form-urlencoded`) are rejected:
+
+```
+HTTP 415 Unsupported Media Type
+```
+
+Exempt paths: `GET /health`, `GET /api/v1/health`.
+
+### CORS Policy
+
+Cross-Origin Resource Sharing is configured via `ALLOWED_ORIGINS` in `.env`. Only the listed origins receive `Access-Control-Allow-Origin` response headers. The default dev value is `http://localhost:5173` (Vite dev server).
+
+### JWT Security
+
+- Tokens expire after `ACCESS_TOKEN_EXPIRE_MINUTES` (default 60 min).
+- Expired, missing, or malformed Bearer tokens all return `HTTP 401 Unauthorized`.
+- Algorithm: `HS256`. Secret is loaded from `SECRET_KEY` env var (never hard-coded).
 
 ---
 
