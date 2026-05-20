@@ -2,14 +2,17 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const NAV_LINKS = [
-  { to: '/',               label: '🏠 Dashboard',     roles: ['Admin', 'Manager', 'Employee'] },
-  { to: '/clock',          label: '⏱ Clock In/Out',   roles: ['Admin', 'Manager', 'Employee'] },
-  { to: '/time-entries',   label: '📋 Time Entries',   roles: ['Admin', 'Manager', 'Employee'] },
-  { to: '/schedules',      label: '📅 Schedules',      roles: ['Admin', 'Manager', 'Employee'] },
-  { to: '/leave',          label: '🌴 Leave',          roles: ['Admin', 'Manager', 'Employee'] },
-  { to: '/timesheets',     label: '💰 Timesheets',     roles: ['Admin', 'Manager', 'Employee'] },
-  { to: '/compliance',     label: '⚠️ Compliance',     roles: ['Admin', 'Manager'] },
-  { to: '/reports',        label: '📊 Reports',        roles: ['Admin', 'Manager'] },
+  { to: '/',            label: '🏠 Dashboard',      roles: ['Admin', 'Manager', 'Employee'] },
+  { to: '/clock',       label: '⏱ Clock In/Out',    roles: ['Admin', 'Manager', 'Employee'] },
+  { to: '/time-entries',label: '📋 Time Entries',    roles: ['Admin', 'Manager', 'Employee'] },
+  { to: '/schedules',   label: '📅 Schedules',       roles: ['Admin', 'Manager', 'Employee'] },
+  { to: '/leave',       label: '🌴 Leave',           roles: ['Admin', 'Manager', 'Employee'] },
+  { to: '/timesheets',  label: '💰 Timesheets',      roles: ['Admin', 'Manager', 'Employee'] },
+  { to: '/payroll',     label: '💳 Payroll Export',  roles: ['Admin', 'Manager'] },
+  { to: '/employees',   label: '👥 Employees',       roles: ['Admin', 'Manager'] },
+  { to: '/compliance',  label: '⚠️ Compliance',      roles: ['Admin', 'Manager'] },
+  { to: '/reports',     label: '📊 Reports',         roles: ['Admin', 'Manager'] },
+  { to: '/admin',       label: '⚙️ Settings',        roles: ['Admin'] },
 ];
 
 const sidebarStyle = {

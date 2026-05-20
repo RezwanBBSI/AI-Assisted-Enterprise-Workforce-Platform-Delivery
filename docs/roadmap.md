@@ -2,8 +2,8 @@
 # BBSI BuildAThon 2026 — Workforce Time Tracking & Payroll Integration Platform
 
 > **Source:** `docs/planning-framework.md` + `docs/requirement-traceability.md`
-> **Last Updated:** 2026-07-01
-> **All 7 Sprints Complete ✅**
+> **Last Updated:** 2026-05-20
+> **All 8 Sprints Complete ✅**
 
 ---
 
@@ -12,10 +12,10 @@
 The platform is delivered across **7 sprints**, each building on the previous. Foundation work (auth, DB, RBAC) is done first so all subsequent feature sprints have a stable base. QA and security validation run alongside development and are formally finalized in Sprint 6.
 
 ```
-Sprint 1 ──▶ Sprint 2 ──▶ Sprint 3 ──▶ Sprint 4 ──▶ Sprint 5 ──▶ Sprint 6 ──▶ Sprint 7
-Foundation   Time Mgmt   Scheduling   Payroll      Compliance    QA &         Ops
-✅ DONE      & Punching  & Leave      & Comp        & Reporting   Security     Readiness
-             ✅ DONE      ✅ DONE       ✅ DONE       ✅ DONE        ✅ DONE       ✅ DONE
+Sprint 1 ──▶ Sprint 2 ──▶ Sprint 3 ──▶ Sprint 4 ──▶ Sprint 5 ──▶ Sprint 6 ──▶ Sprint 7 ──▶ Sprint 8
+Foundation   Time Mgmt   Scheduling   Payroll      Compliance    QA &         Ops          UI Gap
+✅ DONE      & Punching  & Leave      & Comp        & Reporting   Security     Readiness    Fixes
+             ✅ DONE      ✅ DONE       ✅ DONE       ✅ DONE        ✅ DONE       ✅ DONE       ✅ DONE
 ```
 
 ---
@@ -43,6 +43,7 @@ Foundation   Time Mgmt   Scheduling   Payroll      Compliance    QA &         Op
 | Sprint 5 — Compliance & Reporting | ✅ Done — ~161 tests (30 new), 1 new table, 8 new endpoints |
 | Sprint 6 — QA & Security Hardening | ✅ Done — 292 tests (132 new), 93% coverage, 0 bandit HIGH, 0 CVEs, Playwright E2E |
 | Sprint 7 — Operational Readiness | ✅ Done — Full React SPA (9 pages), Docker (multi-stage Dockerfiles + Compose), structured JSON logging + request IDs, incident simulation demo |
+| Sprint 8 — UI Gap Fixes & Admin Pages | ✅ Done — Fixed role null bug, added Payroll/Employees/AdminSettings pages, leave balance on dashboard, mobile CSS, DB migrations run |
 
 ---
 
@@ -391,6 +392,49 @@ Foundation   Time Mgmt   Scheduling   Payroll      Compliance    QA &         Op
 - [x] `docs/incident-triage-example.md` contains log excerpts, root-cause statement, and remediation steps
 - [x] `README.md` updated: fresh clone → `docker-compose up` → working app in < 5 commands
 - [x] All environment variables present in `.env.example`
+
+---
+
+---
+
+## Sprint 8 — UI Gap Fixes & Admin Pages ✅ COMPLETE
+
+**Goal:** Close all gaps identified via live UI review on 2026-05-20. Fix role detection bug, wire unrouted components, add missing admin management pages, ensure RBAC is enforced in the nav.
+
+### Identified Gaps (from screenshots + code audit)
+
+| # | Gap | Severity | Category |
+|---|---|---|---|
+| G-01 | **Role always null** — `GET /api/v1/auth/me` returns `UserResponse` (no `roles` field); `user?.roles?.[0]?.role_name` is always `undefined`; every user sees every nav item; sidebar shows "—" | 🔴 Critical | Bug |
+| G-02 | **Employee sees Compliance & Reports** — direct consequence of G-01; role-based nav filtering is broken | 🔴 Critical | Bug |
+| G-03 | **Payroll page not routed** — `PayrollExportPage.jsx` component exists in `components/` but is never imported in `App.jsx` and has no nav link | 🟠 High | Missing Feature |
+| G-04 | **No Employee Management page** — backend has `/api/v1/employees` but no admin frontend page | 🟠 High | Missing Feature |
+| G-05 | **No Company/Location/Policy admin pages** — endpoints exist (`/companies`, `/locations`, `/policies`) but no admin UI | 🟠 High | Missing Feature |
+| G-06 | **Dashboard stats all zero** — `seed.py` has not been run against the active SQLite DB; all cards show 0 | 🟡 Medium | Data / Setup |
+| G-07 | **Leave balances not on dashboard** — leave balance data available but only shown in LeaveRequestsPage, not surfaced in the Dashboard stat cards | 🟡 Medium | UX |
+| G-08 | **No responsive/mobile CSS** — UI uses inline styles only; no CSS media queries; requirement 4.5 (Mobile Workforce Support) not met | 🟡 Medium | Requirement |
+
+### Sprint 8 Work Items
+
+| Task | File(s) | Detail |
+|---|---|---|
+| Fix `UserResponse` to include roles | `backend/app/schemas/auth.py`, `backend/app/api/v1/endpoints/auth.py` | Add `roles: list[UserRoleInfo]` to `UserResponse`; eager-load `UserRole → Role` in `get_current_user` |
+| Wire `PayrollExportPage` into router + nav | `frontend/src/App.jsx`, `frontend/src/components/Layout.jsx` | Add `/payroll` route (Admin/Manager only); import `PayrollExportPage`; add nav link |
+| Add Employee Management page | `frontend/src/pages/EmployeesPage.jsx` (new) | Admin-only page: list employees, show role/company, invite/deactivate |
+| Add Admin Settings page | `frontend/src/pages/AdminSettingsPage.jsx` (new) | Tabs for Companies, Locations, Policies management |
+| Run seed data | `backend/scripts/seed.py` | Execute seed so dashboard stats show real data |
+| Add leave balance to Dashboard | `frontend/src/pages/DashboardPage.jsx` | Fetch `/leave-balances` and show PTO/Sick balance cards |
+| Mobile responsive CSS | `frontend/src/index.css`, page components | Add viewport meta, CSS media queries for sidebar collapse and card stacking |
+
+### Phase Completion Criteria — Sprint 8 is DONE when:
+- [x] Employee user sees only Dashboard, Clock In/Out, Time Entries, Schedules, Leave, Timesheets in nav
+- [x] Manager/Admin see Compliance and Reports in addition
+- [x] Sidebar shows correct role name (Admin / Manager / Employee) below logo
+- [x] Payroll page is accessible at `/payroll` for Manager/Admin
+- [x] Admin can access Employee Management and Settings pages
+- [x] Dashboard stats show non-zero values after seed is run
+- [x] Leave balance cards visible on Dashboard
+- [x] UI is usable on a 375px-wide mobile viewport
 
 ---
 

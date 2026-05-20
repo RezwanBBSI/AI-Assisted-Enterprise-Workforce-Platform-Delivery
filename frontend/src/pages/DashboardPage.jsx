@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getTimeEntries, getLeaveRequests, getTimesheets, getMissingPunches } from '../api';
+import { getTimeEntries, getLeaveRequests, getTimesheets, getMissingPunches, getLeaveBalance } from '../api';
 
 function StatCard({ label, value, color, to }) {
   const card = (
@@ -24,6 +24,7 @@ function StatCard({ label, value, color, to }) {
 export default function DashboardPage() {
   const { token, user, companyId, isManager } = useAuth();
   const [stats, setStats] = useState({ openEntry: null, pendingLeave: 0, timesheets: 0, missingPunches: 0 });
+  const [leaveBalance, setLeaveBalance] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -49,11 +50,19 @@ export default function DashboardPage() {
         }
 
         setStats({ openEntry, pendingLeave, timesheets, missingPunches });
+
+        // Fetch leave balance for current user
+        if (user?.id && companyId) {
+          try {
+            const bal = await getLeaveBalance(token, user.id, companyId);
+            setLeaveBalance(bal);
+          } catch (_) {}
+        }
       } catch (_) {}
       setLoading(false);
     };
     load();
-  }, [token, companyId, isManager]);
+  }, [token, companyId, isManager, user?.id]);
 
   if (loading) return <p>Loading dashboard…</p>;
 
@@ -98,6 +107,18 @@ export default function DashboardPage() {
           />
         )}
       </div>
+
+      {/* Leave balances */}
+      {leaveBalance && (
+        <div style={{ marginBottom: '2rem' }}>
+          <h2 style={{ margin: '0 0 0.75rem', fontSize: 15, color: '#555', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 }}>Leave Balances</h2>
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+            <StatCard label="PTO Available" value={`${leaveBalance.pto_balance ?? 0}h`} color="#7b1fa2" to="/leave" />
+            <StatCard label="Sick Available" value={`${leaveBalance.sick_balance ?? 0}h`} color="#0097a7" to="/leave" />
+            <StatCard label="Comp Time" value={`${leaveBalance.comp_balance ?? 0}h`} color="#f57c00" to="/leave" />
+          </div>
+        </div>
+      )}
 
       {/* Quick Actions */}
       <div style={{ background: '#fff', borderRadius: 10, padding: '1.5rem', boxShadow: '0 2px 8px rgba(0,0,0,0.07)', marginBottom: '1.5rem' }}>

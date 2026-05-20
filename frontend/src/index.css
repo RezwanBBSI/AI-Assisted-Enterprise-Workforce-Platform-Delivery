@@ -55,7 +55,7 @@ body {
 }
 
 #root {
-  width: 1126px;
+  width: 100%;
   max-width: 100%;
   margin: 0 auto;
   text-align: center;
@@ -108,4 +108,47 @@ code {
   line-height: 135%;
   padding: 4px 8px;
   background: var(--code-bg);
+}
+
+/* ── Mobile responsive layout ─────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Collapse the sidebar into a top bar */
+  div[style*="width: 220"] {
+    width: 100% !important;
+    min-height: unset !important;
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    padding: 0.5rem 0 !important;
+  }
+
+  /* Stack the app layout vertically on mobile */
+  div[style*="display: flex"][style*="min-height: 100vh"] {
+    flex-direction: column !important;
+  }
+
+  /* Main content area — full width, reduced padding */
+  div[style*="flex: 1"][style*="padding"] {
+    padding: 1rem !important;
+  }
+
+  /* Stat cards — stack vertically */
+  div[style*="display: flex"][style*="flexWrap: wrap"] {
+    flex-direction: column !important;
+  }
+
+  /* Tables — allow horizontal scroll */
+  table {
+    min-width: 480px;
+  }
+
+  div[style*="overflowX: auto"] {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Buttons in nav — compact */
+  nav a {
+    padding: 0.4rem 0.75rem !important;
+    font-size: 13px !important;
+  }
 }

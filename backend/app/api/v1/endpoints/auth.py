@@ -7,7 +7,11 @@ from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.core.limiter import limiter
 from app.models.user import User
-from app.schemas.auth import LoginRequest, RegisterRequest, TokenResponse, UserResponse
+from sqlalchemy import select
+
+from app.models.role import Role
+from app.models.user_role import UserRole
+from app.schemas.auth import LoginRequest, RegisterRequest, TokenResponse, UserResponse, UserRoleInfo
 from app.services.auth_service import AuthService
 
 router = APIRouter()
@@ -25,7 +29,7 @@ async def register(
 
 
 @router.post("/login", response_model=TokenResponse)
-@limiter.limit("5/5minutes")
+@limiter.limit("30/minute")
 async def login(
     request: Request,
     payload: LoginRequest,
@@ -53,5 +57,22 @@ async def refresh_token(
 @router.get("/me", response_model=UserResponse)
 async def me(
     current_user: Annotated[User, Depends(get_current_user)],
-) -> User:
-    return current_user
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> UserResponse:
+    rows = await db.execute(
+        select(UserRole, Role)
+        .join(Role, UserRole.role_id == Role.id)
+        .where(UserRole.user_id == current_user.id)
+    )
+    roles = [
+        UserRoleInfo(company_id=ur.company_id, role_name=role.name)
+        for ur, role in rows.all()
+    ]
+    return UserResponse(
+        id=current_user.id,
+        email=current_user.email,
+        full_name=current_user.full_name,
+        is_active=current_user.is_active,
+        created_at=current_user.created_at,
+        roles=roles,
+    )

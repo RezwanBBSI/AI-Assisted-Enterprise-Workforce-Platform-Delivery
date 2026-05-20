@@ -10,8 +10,11 @@ import TimeEntriesPage from './pages/TimeEntriesPage';
 import SchedulesPage from './pages/SchedulesPage';
 import LeaveRequestsPage from './pages/LeaveRequestsPage';
 import TimesheetsPage from './pages/TimesheetsPage';
+import PayrollPage from './pages/PayrollPage';
 import CompliancePage from './pages/CompliancePage';
 import ReportsPage from './pages/ReportsPage';
+import EmployeesPage from './pages/EmployeesPage';
+import AdminSettingsPage from './pages/AdminSettingsPage';
 
 function App() {
   return (
@@ -73,6 +76,22 @@ function App() {
 
           {/* Protected — Manager / Admin */}
           <Route
+            path="/payroll"
+            element={
+              <ProtectedRoute requireManager>
+                <Layout><PayrollPage /></Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employees"
+            element={
+              <ProtectedRoute requireManager>
+                <Layout><EmployeesPage /></Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/compliance"
             element={
               <ProtectedRoute requireManager>
@@ -85,6 +104,16 @@ function App() {
             element={
               <ProtectedRoute requireManager>
                 <Layout><ReportsPage /></Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Protected — Admin only */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute requireAdmin>
+                <Layout><AdminSettingsPage /></Layout>
               </ProtectedRoute>
             }
           />
