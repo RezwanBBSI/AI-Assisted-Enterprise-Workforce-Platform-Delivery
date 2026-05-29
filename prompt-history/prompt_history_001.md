@@ -6,6 +6,103 @@ A new file is started only when this one becomes too long (target: ~100 entries 
 
 ---
 
+## Prompt 028 — 2026-05-29 | Retake Screenshots with Real Data
+
+**Agent:** GitHub Copilot
+**Model:** Claude Sonnet 4.6
+
+**Summary:**
+Identified that several screenshots captured in Prompt #027 showed empty states (payroll, compliance, reports). Created a comprehensive data-seeding script and retook 7 screenshots with live data.
+
+**Delivered:**
+- **`backend/scripts/seed_screenshot_data.py`** (new) — async SQLAlchemy script that seeds: 60 time entries (employee + manager across May 1–28, `status=closed`), 3 fully-approved timesheets (40h regular + 40h OT each via `TimesheetService.generate`), 5 compliance violations (missed_punch × 2, overtime_threshold × 2, meal_break_violation × 1), and 20 attendance records
+- **7 screenshots retaken** with live data:
+
+| File | Before | After |
+|------|--------|-------|
+| `15-payroll.png` | "No approved timesheets" | 3 rows, 40h reg + 40h OT, CSV/JSON export buttons |
+| `11-compliance.png` | Empty | 5 violations with type, description, resolved/open status |
+| `12-reports-operational.png` | All zeros | Live metrics table |
+| `05-timesheets-employee.png` | Empty | Timesheets with hours, pay periods, approve/export buttons |
+| `13-reports-exceptions.png` | Empty | Loaded exceptions table |
+| `14-reports-crosscheck.png` | Empty | Crosscheck results |
+| `19-audit-trail.png` | Empty | Full audit log — timesheet_generated, clock_in/out entries |
+
+**Running totals:**
+- Backend tests: **292 passing** (no code changes)
+- Migration head: **b7e3f9a2c851** (unchanged)
+
+---
+
+## Prompt 027 — 2026-05-29 | App Walkthrough with Screenshots
+
+**Agent:** GitHub Copilot
+**Model:** Claude Sonnet 4.6
+
+**Summary:**
+User requested screenshots of the app across all pages with captions, consolidated into a `walkthrough/` folder alongside `instructions.md`.
+
+**Delivered:**
+- **`frontend/screenshot.mjs`** (new) — Playwright headless-Chromium script (1440×900) that logs in as Employee, Manager, and Admin in sequence and captures 19 full-page screenshots with descriptive filenames
+- **`walkthrough/screenshots/`** — 19 PNG screenshots covering all pages and role views:
+  `01-login`, `02-dashboard-employee`, `03-clock-in-out`, `04-time-entries`, `05-timesheets-employee`, `06-leave-requests-employee`, `07-schedules-employee`, `08-dashboard-manager`, `09-schedules-manager`, `10-employees`, `11-compliance`, `12-reports-operational`, `13-reports-exceptions`, `14-reports-crosscheck`, `15-payroll`, `16-admin-settings`, `17-admin-locations`, `18-admin-policies`, `19-audit-trail`
+- **`walkthrough/README.md`** (new) — Full visual walkthrough: each screenshot embedded inline with a heading and caption paragraph explaining the page's purpose and key features
+- **`walkthrough/instructions.md`** (new) — Copy of `docs/instructions.md` (`./start.sh` + localhost link)
+- **`walkthrough/screenshots-index.md`** (new) — Auto-generated markdown table index of all screenshots
+
+**Running totals:**
+- Backend tests: **292 passing** (unchanged)
+- Migration head: **b7e3f9a2c851** (unchanged)
+
+---
+
+## Prompt 026 — 2026-05-29 | Live App Audit — Contrast & Bug Fixes
+
+**Agent:** GitHub Copilot
+**Model:** Claude Sonnet 4.6
+
+**Summary:**
+Resumed live audit. Started backend and frontend servers, retested all API endpoints for all 3 roles, then reviewed every JSX file for WCAG AA contrast failures. Fixed all contrast issues, one functional bug, two UX improvements (employee name resolution), and one backend security regression (rate limit).
+
+**Contrast failures found and fixed (WCAG AA requires ≥4.5:1):**
+
+| File | Issue | Before | After | Ratio fix |
+|---|---|---|---|---|
+| 7 pages | Empty-state text `#999` on white | ~2.7:1 ❌ | `#666` | 5.22:1 ✅ |
+| `LeaveRequestsPage.jsx` | Cancelled badge `#757575` on `#f5f5f5` | ~3.6:1 ❌ | `#555` | 5.74:1 ✅ |
+| `AdminSettingsPage.jsx` + `EmployeesPage.jsx` | Inactive badge `#999` on `#fafafa` | ~2.65:1 ❌ | `#595959` | 5.93:1 ✅ |
+| `AuditTrailViewer.jsx` | Clear button `#757575` bg w/ white text | ~4.32:1 ❌ | `#616161` | 5.74:1 ✅ |
+| `Layout.jsx` | Sidebar sub-text `opacity: 0.7` on `#1565c0` | ~3.16:1 ❌ | `rgba(255,255,255,0.9)` | 9.1:1 ✅ |
+
+**Functional bug fixed:**
+
+| # | Severity | File | Bug | Fix |
+|---|---|---|---|---|
+| 1 | 🔴 HIGH | `api.js` | `getAttendanceExceptions` sent `pay_period_start`/`pay_period_end` but endpoint uses `start_date`/`end_date` → always 422 | Renamed query params to `start_date` / `end_date` |
+
+**UX improvements:**
+- **`SchedulesPage.jsx`** — Column renamed from "Employee ID" to "Employee"; table cells now resolve UUID to full name via `employees` array lookup (managers) or `user.full_name` fallback (employees viewing own shifts)
+- **`ReportsPage.jsx`** — Loads all employees on mount into `employeeMap`; `empName(id)` helper used in Attendance Exceptions and Crosscheck result tables instead of truncated UUIDs
+
+**Backend fix:**
+- **`auth.py`** — Restored login rate limit to `"5/minute"` (was relaxed to `"30/minute"` which broke `test_login_rate_limit_429_on_sixth_attempt`)
+
+**All fixes verified:**
+- `grep -rn "#999|#757|opacity: 0.7"` → zero hits in `frontend/src/`
+- `GET /reports/attendance-exceptions?...&start_date=...&end_date=...` → HTTP 200 ✅
+- `pytest tests/test_security_hardening.py::TestRateLimiting` → 2 passed ✅
+
+**Committed as:** `fix(frontend+backend): live audit — WCAG contrast, param mismatch, employee names, rate limit`
+
+**Files changed:** 14 (13 frontend, 1 backend)
+
+**Running totals:**
+- Backend tests: **292 passing** (rate limit test restored to passing)
+- Migration head: **b7e3f9a2c851** (unchanged)
+- All 8 sprints: ✅ COMPLETE
+
+---
+
 ## Prompt 023 — 2026-05-29 | Startup Script
 
 **Agent:** GitHub Copilot

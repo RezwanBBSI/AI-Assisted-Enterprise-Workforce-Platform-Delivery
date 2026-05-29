@@ -44,6 +44,7 @@ Foundation   Time Mgmt   Scheduling   Payroll      Compliance    QA &         Op
 | Sprint 6 — QA & Security Hardening | ✅ Done — 292 tests (132 new), 93% coverage, 0 bandit HIGH, 0 CVEs, Playwright E2E |
 | Sprint 7 — Operational Readiness | ✅ Done — Full React SPA (9 pages), Docker (multi-stage Dockerfiles + Compose), structured JSON logging + request IDs, incident simulation demo |
 | Sprint 8 — UI Gap Fixes & Admin Pages | ✅ Done — Fixed role null bug, added Payroll/Employees/AdminSettings pages, leave balance on dashboard, mobile CSS, DB migrations run |
+| Post-Sprint — Live Audit & Polish | ✅ Done — WCAG AA contrast fixes across all pages, attendance-exceptions param bug, employee name resolution (Schedules/Reports), rate limit restored, 19-page screenshot walkthrough with real seeded data |
 
 ---
 
