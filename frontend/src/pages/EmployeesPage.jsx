@@ -86,7 +86,7 @@ export default function EmployeesPage() {
             <tbody>
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>
+                  <td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
                     {search ? 'No employees match your search.' : 'No employees found.'}
                   </td>
                 </tr>
@@ -108,7 +108,7 @@ export default function EmployeesPage() {
                     <td style={{ padding: '0.75rem 1rem' }}>
                       <span style={{
                         background: emp.is_active ? '#e8f5e9' : '#fafafa',
-                        color: emp.is_active ? '#2e7d32' : '#999',
+                        color: emp.is_active ? '#2e7d32' : '#595959',
                         padding: '2px 10px',
                         borderRadius: 12,
                         fontSize: 12,

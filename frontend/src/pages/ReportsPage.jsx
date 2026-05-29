@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import OperationalReport from '../components/OperationalReport';
 import AuditTrailViewer from '../components/AuditTrailViewer';
-import { getAttendanceExceptions, getCrosscheck } from '../api';
+import { getAttendanceExceptions, getCrosscheck, getEmployees } from '../api';
 
 function todayMinus(n) {
   const d = new Date();
@@ -15,6 +15,20 @@ export default function ReportsPage() {
   const [start, setStart] = useState(todayMinus(14));
   const [end, setEnd] = useState(todayMinus(1));
   const [activeTab, setActiveTab] = useState('operational');
+  const [employeeMap, setEmployeeMap] = useState({});
+
+  useEffect(() => {
+    if (!token || !companyId) return;
+    getEmployees(token, companyId, 1, 100)
+      .then(d => {
+        const map = {};
+        (d.items || []).forEach(e => { map[e.id] = e.full_name || e.email; });
+        setEmployeeMap(map);
+      })
+      .catch(() => {});
+  }, [token, companyId]);
+
+  const empName = (id) => employeeMap[id] || id?.slice(0, 8) + '…';
 
   // Attendance exceptions state
   const [exceptions, setExceptions] = useState([]);
@@ -124,7 +138,7 @@ export default function ReportsPage() {
                 <tbody>
                   {exceptions.map((ex, i) => (
                     <tr key={i} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                      <td style={td}><code style={{ fontSize: 11 }}>{ex.employee_id?.slice(0, 8)}…</code></td>
+                      <td style={td}>{empName(ex.employee_id)}</td>
                       <td style={td}>{ex.date}</td>
                       <td style={td}><span style={{ fontWeight: 600, color: '#e65100' }}>{ex.status}</span></td>
                     </tr>
@@ -156,7 +170,7 @@ export default function ReportsPage() {
                 <tbody>
                   {crosscheck.map((d, i) => (
                     <tr key={i} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                      <td style={td}><code style={{ fontSize: 11 }}>{d.employee_id?.slice(0, 8)}…</code></td>
+                      <td style={td}>{empName(d.employee_id)}</td>
                       <td style={td}><span style={{ color: '#e65100', fontWeight: 600 }}>{d.issue}</span></td>
                       <td style={td}>{d.detail || '—'}</td>
                     </tr>

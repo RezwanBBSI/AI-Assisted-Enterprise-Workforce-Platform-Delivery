@@ -95,7 +95,7 @@ export default function LoginPage() {
 
         {/* Demo quick-fill */}
         <div style={{ marginTop: '1.5rem', borderTop: '1px solid #eee', paddingTop: '1rem' }}>
-          <p style={{ fontSize: 12, color: '#999', marginBottom: 8 }}>Demo accounts (click to fill):</p>
+          <p style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>Demo accounts (click to fill):</p>
           <div style={{ display: 'flex', gap: 6 }}>
             {['admin', 'manager', 'employee'].map(r => (
               <button key={r} onClick={() => fillDemo(r)} style={demoBtn}>

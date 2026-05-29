@@ -6,6 +6,74 @@ A new file is started only when this one becomes too long (target: ~100 entries 
 
 ---
 
+## Prompt 023 — 2026-05-29 | Startup Script
+
+**Agent:** GitHub Copilot
+**Model:** Claude Sonnet 4.6
+
+**Summary:**
+User requested a single script to start both backend and frontend dev servers.
+
+**Delivered:**
+- **`start.sh`** (new, project root, chmod +x) — Bash script that: (1) sources `backend/venv/bin/activate`; (2) starts `uvicorn app.main:app --reload --host 0.0.0.0 --port 8000` in background; (3) runs `npm install` if `node_modules` missing; (4) starts `npm run dev` in background; (5) `trap cleanup INT TERM` cleanly kills both PIDs on Ctrl+C. Verified: both servers confirmed running — uvicorn on :8000, Vite on :5173.
+
+---
+
+## Prompt 024 — 2026-05-29 | Instructions Doc
+
+**Agent:** GitHub Copilot
+**Model:** Claude Sonnet 4.6
+
+**Summary:**
+User requested a minimal instructions doc in `docs/`. Created then immediately simplified per user feedback.
+
+**Delivered:**
+- **`docs/instructions.md`** (new) — Two-line doc: `./start.sh` command + clickable link to `http://localhost:5173`.
+
+---
+
+## Prompt 025 — 2026-05-29 | Full App Audit & Bug Fixes
+
+**Agent:** GitHub Copilot
+**Model:** Claude Sonnet 4.6
+
+**Summary:**
+Full end-to-end audit of the live app against all requirements. Tested all endpoints via curl for each role, read all frontend page source, compared field names against backend schemas. Found and fixed 3 confirmed bugs plus seeded realistic demo data.
+
+**Audit findings (all roles tested: Admin, Manager, Employee):**
+- All 12 pages load without error ✅
+- Auth, Clock In/Out, Time Entries, Leave Requests, Timesheets, Compliance, Reports, Employees, Payroll, Admin Settings all functionally working ✅
+- Requirements coverage confirmed: all 4.1–4.6 functional requirements met by existing implementation ✅
+
+**Bugs found and fixed:**
+
+| # | Severity | File | Bug | Fix |
+|---|---|---|---|---|
+| 1 | 🔴 HIGH | `SchedulesPage.jsx` | Form sends `start_time`/`end_time` but `ShiftCreate` schema expects `shift_start`/`shift_end` → every shift creation 422'd | Renamed form state keys and `onChange` handlers and display fields to `shift_start`/`shift_end` |
+| 2 | 🔴 HIGH | `api.js` | `reviewLeaveRequest` sends `{status, comment}` but `LeaveReviewRequest` schema expects `{approve: bool, review_comment}` → every manager leave approval 422'd | Mapped `status === 'approved'` → `approve: true` and `comment` → `review_comment` |
+| 3 | 🟡 MEDIUM | `DashboardPage.jsx` | Leave balance cards used `pto_balance`/`sick_balance`/`comp_balance` fields that don't exist in API response → always showed 0h | Computed from real fields: `pto_total - pto_used`, `sick_total - sick_used`, `comp_earned - comp_used` |
+
+**Demo data seeded:**
+- `seed_demo_data()` function added to `backend/scripts/seed.py`:
+  - Leave balances: 80h PTO / 40h sick / 8h comp for each user (previously all 0)
+  - 2 leave requests: one pending (employee, PTO next week), one approved (manager, sick)
+  - 6 upcoming shifts for next week: 3×employee (9am-5pm), 2×manager (8am-4pm), 1×admin (10am-6pm)
+- Seed run confirmed: all data created and verified via curl
+
+**All 3 fixes verified via curl:**
+- Leave review: `approve: true` → `status: approved` ✅
+- Shift creation with `shift_start`/`shift_end` → 201 Created ✅
+- Leave balance: `PTO: 72.0h avail, Sick: 40.0h avail` ✅
+
+**Committed as:** `fix: bug fixes from full app audit + demo data seed`
+
+**Running totals:**
+- Backend tests: **292 passing** (unchanged — no new backend logic changed)
+- Migration head: **b7e3f9a2c851** (unchanged)
+- All 8 sprints: ✅ COMPLETE
+
+---
+
 ## Prompt 001 — 2026-05-14 | Project Kickoff
 
 **Agent:** GitHub Copilot

@@ -6,7 +6,7 @@ function fmt(dt) { return dt ? new Date(dt).toLocaleString() : '—'; }
 function fmtDate(d) { return d ? new Date(d).toLocaleDateString() : '—'; }
 
 export default function SchedulesPage() {
-  const { token, companyId, isManager } = useAuth();
+  const { token, companyId, isManager, user } = useAuth();
   const [shifts, setShifts] = useState([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -127,20 +127,20 @@ export default function SchedulesPage() {
               <th style={th}>Start</th>
               <th style={th}>End</th>
               <th style={th}>Break</th>
-              <th style={th}>Employee ID</th>
+              <th style={th}>Employee</th>
               {isManager && <th style={th}>Actions</th>}
             </tr>
           </thead>
           <tbody>
             {loading && <tr><td colSpan={6} style={{ padding: '1rem', textAlign: 'center' }}>Loading…</td></tr>}
-            {!loading && shifts.length === 0 && <tr><td colSpan={6} style={{ padding: '1rem', textAlign: 'center', color: '#999' }}>No shifts scheduled</td></tr>}
+            {!loading && shifts.length === 0 && <tr><td colSpan={6} style={{ padding: '1rem', textAlign: 'center', color: '#666' }}>No shifts scheduled</td></tr>}
             {shifts.map(s => (
               <tr key={s.id} style={{ borderBottom: '1px solid #f0f0f0' }}>
                 <td style={td}>{fmtDate(s.shift_date)}</td>
                 <td style={td}>{s.shift_start}</td>
                 <td style={td}>{s.shift_end}</td>
                 <td style={td}>{s.break_minutes} min</td>
-                <td style={td}><code style={{ fontSize: 11, color: '#666' }}>{s.employee_id?.slice(0, 8)}…</code></td>
+                <td style={td}>{employees.find(e => e.id === s.employee_id)?.full_name || (user?.id === s.employee_id ? user.full_name : s.employee_id?.slice(0, 8) + '…')}</td>
                 {isManager && (
                   <td style={td}>
                     <button onClick={() => handleDelete(s.id)} style={{ ...smallBtn, color: '#c62828', borderColor: '#ffcdd2' }}>Delete</button>

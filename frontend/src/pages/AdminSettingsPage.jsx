@@ -156,7 +156,7 @@ function Table({ headers, rows, empty }) {
         </thead>
         <tbody>
           {rows.length === 0 ? (
-            <tr><td colSpan={headers.length} style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>{empty}</td></tr>
+            <tr><td colSpan={headers.length} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>{empty}</td></tr>
           ) : (
             rows.map((row, i) => (
               <tr key={i} style={{ borderTop: '1px solid #f0f0f0' }}>
@@ -176,7 +176,7 @@ function ActiveBadge({ active }) {
   return (
     <span style={{
       background: active ? '#e8f5e9' : '#fafafa',
-      color: active ? '#2e7d32' : '#999',
+      color: active ? '#2e7d32' : '#595959',
       padding: '2px 10px',
       borderRadius: 12,
       fontSize: 12,

@@ -148,4 +148,4 @@ const td = { padding: "8px 12px", borderBottom: "1px solid #eee" };
 const labelStyle = { display: "block", fontSize: 12, color: "#555", marginBottom: 4 };
 const inputStyle = { padding: "6px 10px", borderRadius: 4, border: "1px solid #ccc", minWidth: 140 };
 const btnStyle = { padding: "5px 12px", borderRadius: 4, border: "none", background: "#1565c0", color: "#fff", cursor: "pointer" };
-const clearBtnStyle = { ...btnStyle, background: "#757575" };
+const clearBtnStyle = { ...btnStyle, background: "#616161" };

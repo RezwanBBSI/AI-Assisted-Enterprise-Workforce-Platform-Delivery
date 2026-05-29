@@ -149,7 +149,7 @@ export default function TimesheetsPage() {
           </thead>
           <tbody>
             {loading && <tr><td colSpan={5} style={{ padding: '1rem', textAlign: 'center' }}>Loading…</td></tr>}
-            {!loading && timesheets.length === 0 && <tr><td colSpan={5} style={{ padding: '1rem', textAlign: 'center', color: '#999' }}>No timesheets yet</td></tr>}
+            {!loading && timesheets.length === 0 && <tr><td colSpan={5} style={{ padding: '1rem', textAlign: 'center', color: '#666' }}>No timesheets yet</td></tr>}
             {timesheets.map(ts => (
               <>
                 <tr

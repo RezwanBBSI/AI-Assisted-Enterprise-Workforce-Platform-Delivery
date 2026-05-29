@@ -154,7 +154,7 @@ export default function ClockInOutPage() {
           </thead>
           <tbody>
             {entries.length === 0 && (
-              <tr><td colSpan={4} style={{ padding: '1rem', textAlign: 'center', color: '#999' }}>No entries yet</td></tr>
+              <tr><td colSpan={4} style={{ padding: '1rem', textAlign: 'center', color: '#666' }}>No entries yet</td></tr>
             )}
             {entries.map(e => (
               <tr key={e.id} style={{ borderBottom: '1px solid #f0f0f0' }}>

@@ -8,7 +8,7 @@ const STATUS_COLORS = {
   pending:   { bg: '#fff3e0', color: '#e65100' },
   approved:  { bg: '#e8f5e9', color: '#2e7d32' },
   denied:    { bg: '#fdecea', color: '#c62828' },
-  cancelled: { bg: '#f5f5f5', color: '#757575' },
+  cancelled: { bg: '#f5f5f5', color: '#555' },
 };
 
 function fmt(d) { return d ? new Date(d).toLocaleDateString() : '—'; }
@@ -154,7 +154,7 @@ export default function LeaveRequestsPage() {
           </thead>
           <tbody>
             {loading && <tr><td colSpan={6} style={{ padding: '1rem', textAlign: 'center' }}>Loading…</td></tr>}
-            {!loading && requests.length === 0 && <tr><td colSpan={6} style={{ padding: '1rem', textAlign: 'center', color: '#999' }}>No leave requests</td></tr>}
+            {!loading && requests.length === 0 && <tr><td colSpan={6} style={{ padding: '1rem', textAlign: 'center', color: '#666' }}>No leave requests</td></tr>}
             {requests.map(r => (
               <>
                 <tr key={r.id} style={{ borderBottom: '1px solid #f0f0f0' }}>

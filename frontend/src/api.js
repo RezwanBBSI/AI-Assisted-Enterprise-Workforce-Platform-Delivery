@@ -139,7 +139,7 @@ export const getAuditTrail = (token, page = 1, size = 20) =>
   request('GET', `/reports/audit-trail?page=${page}&size=${size}`, undefined, token);
 
 export const getAttendanceExceptions = (token, companyId, start, end, page = 1, size = 20) =>
-  request('GET', `/reports/attendance-exceptions?company_id=${companyId}&pay_period_start=${start}&pay_period_end=${end}&page=${page}&size=${size}`, undefined, token);
+  request('GET', `/reports/attendance-exceptions?company_id=${companyId}&start_date=${start}&end_date=${end}&page=${page}&size=${size}`, undefined, token);
 
 export const getCrosscheck = (token, companyId, start, end) =>
   request('GET', `/reports/crosscheck?company_id=${companyId}&pay_period_start=${start}&pay_period_end=${end}`, undefined, token);

@@ -67,7 +67,7 @@ export default function Layout({ children }) {
       <nav style={sidebarStyle}>
         <div style={logoStyle}>
           <div style={{ fontWeight: 700, fontSize: 16 }}>BBSI Workforce</div>
-          <div style={{ fontSize: 12, opacity: 0.7, marginTop: 2 }}>{role || '—'}</div>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.9)', marginTop: 2 }}>{role || '—'}</div>
         </div>
 
         {visibleLinks.map(({ to, label }) => (
@@ -82,7 +82,7 @@ export default function Layout({ children }) {
         ))}
 
         <div style={{ marginTop: 'auto', padding: '1rem 1.25rem', borderTop: '1px solid rgba(255,255,255,0.15)' }}>
-          <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 4 }}>{user?.email}</div>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.9)', marginBottom: 4 }}>{user?.email}</div>
           <button
             onClick={handleLogout}
             style={{

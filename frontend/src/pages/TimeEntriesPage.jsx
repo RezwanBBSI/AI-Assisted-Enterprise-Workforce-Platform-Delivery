@@ -66,7 +66,7 @@ export default function TimeEntriesPage() {
 
       <div style={{ background: '#fff', borderRadius: 10, boxShadow: '0 2px 8px rgba(0,0,0,0.07)', overflow: 'hidden' }}>
         {loading ? (
-          <p style={{ padding: '1rem', color: '#999' }}>Loading…</p>
+          <p style={{ padding: '1rem', color: '#666' }}>Loading…</p>
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
             <thead>
@@ -80,7 +80,7 @@ export default function TimeEntriesPage() {
             </thead>
             <tbody>
               {entries.length === 0 && (
-                <tr><td colSpan={5} style={{ padding: '1rem', textAlign: 'center', color: '#999' }}>No entries</td></tr>
+                <tr><td colSpan={5} style={{ padding: '1rem', textAlign: 'center', color: '#666' }}>No entries</td></tr>
               )}
               {entries.map(e => (
                 <>
