@@ -44,16 +44,6 @@ Both services verified functional (backend import check passed; Vite dev server 
 
 ---
 
-## Prompt 004 — 2026-05-14 | Prompt History Setup
-
-**Agent:** GitHub Copilot
-**Model:** Claude Sonnet 4.6
-
-**Summary:**
-Created the `prompt-history/` directory at the project root to maintain a chronological log of all prompts throughout the build. This file (`prompt_history_001.md`) was created to record all prompts in a single file, with a new file only started when this one becomes too long. Backfilled entries for Prompts 001–003. Established the log format: prompt number, date/time, title, agent, subagents, and summary. Going forward this file will be updated at the end of every completed prompt.
-
----
-
 ## Prompt 005 — 2026-05-14 | Planning Document Creation
 
 **Agent:** GitHub Copilot
@@ -107,18 +97,6 @@ User requested that planning docs be made significantly more detailed — specif
 - Every sprint section expanded with: DB model table (fields listed), API endpoint table (method/path/auth/description), business rules table, frontend component table, and an explicit "Phase Completion Criteria" checklist. Coverage targets, specific HTTP status codes, tool commands, and seeded test data expectations all called out explicitly.
 
 Committed as: `docs: expand planning-framework and roadmap with detailed sprint specs`
-
----
-## Prompt 006 — 2026-05-14 | Build Sequence & Doc Updates
-
-**Agent:** GitHub Copilot
-**Model:** Claude Sonnet 4.6
-
-**Summary:**
-User asked how to proceed with building the application and requested any necessary doc updates. A 27-step ordered build sequence was presented, grouped by sprint: (1) DB + Auth foundation, (2) Time management APIs + frontend, (3) Scheduling & leave, (4) Payroll & compensation, (5) Compliance & reporting, (6) QA & security, (7) Operational readiness. Two docs were updated:
-
-- **`docs/roadmap.md`** — Added a "Current Status" table showing what is done vs. not started; marked Sprint 1 as the active sprint (`🔄 CURRENT`) in the overview and sprint heading; updated the `Last Updated` header.
-- **`docs/quick-reference.md`** — Added a "Build Sequence" section with all 27 steps as a checklist table (step number, description, sprint, status) positioned above the start commands.
 
 ---
 

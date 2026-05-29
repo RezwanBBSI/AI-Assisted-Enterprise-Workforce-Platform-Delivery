@@ -15,7 +15,7 @@ export default function SchedulesPage() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
     employee_id: '', location_id: '', shift_date: '',
-    start_time: '09:00', end_time: '17:00', break_minutes: 30,
+    shift_start: '09:00', shift_end: '17:00', break_minutes: 30,
   });
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState(null);
@@ -104,11 +104,11 @@ export default function SchedulesPage() {
             </div>
             <div>
               <label style={lbl}>Start Time</label>
-              <input type="time" required value={form.start_time} onChange={e => setForm(f => ({ ...f, start_time: e.target.value }))} style={inp} />
+              <input type="time" required value={form.shift_start} onChange={e => setForm(f => ({ ...f, shift_start: e.target.value }))} style={inp} />
             </div>
             <div>
               <label style={lbl}>End Time</label>
-              <input type="time" required value={form.end_time} onChange={e => setForm(f => ({ ...f, end_time: e.target.value }))} style={inp} />
+              <input type="time" required value={form.shift_end} onChange={e => setForm(f => ({ ...f, shift_end: e.target.value }))} style={inp} />
             </div>
             <div>
               <label style={lbl}>Break (min)</label>
@@ -137,8 +137,8 @@ export default function SchedulesPage() {
             {shifts.map(s => (
               <tr key={s.id} style={{ borderBottom: '1px solid #f0f0f0' }}>
                 <td style={td}>{fmtDate(s.shift_date)}</td>
-                <td style={td}>{s.start_time}</td>
-                <td style={td}>{s.end_time}</td>
+                <td style={td}>{s.shift_start}</td>
+                <td style={td}>{s.shift_end}</td>
                 <td style={td}>{s.break_minutes} min</td>
                 <td style={td}><code style={{ fontSize: 11, color: '#666' }}>{s.employee_id?.slice(0, 8)}…</code></td>
                 {isManager && (

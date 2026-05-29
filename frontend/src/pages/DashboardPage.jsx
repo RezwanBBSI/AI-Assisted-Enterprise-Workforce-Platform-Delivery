@@ -113,9 +113,9 @@ export default function DashboardPage() {
         <div style={{ marginBottom: '2rem' }}>
           <h2 style={{ margin: '0 0 0.75rem', fontSize: 15, color: '#555', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 }}>Leave Balances</h2>
           <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-            <StatCard label="PTO Available" value={`${leaveBalance.pto_balance ?? 0}h`} color="#7b1fa2" to="/leave" />
-            <StatCard label="Sick Available" value={`${leaveBalance.sick_balance ?? 0}h`} color="#0097a7" to="/leave" />
-            <StatCard label="Comp Time" value={`${leaveBalance.comp_balance ?? 0}h`} color="#f57c00" to="/leave" />
+            <StatCard label="PTO Available" value={`${((leaveBalance.pto_total ?? 0) - (leaveBalance.pto_used ?? 0)).toFixed(1)}h`} color="#7b1fa2" to="/leave" />
+            <StatCard label="Sick Available" value={`${((leaveBalance.sick_total ?? 0) - (leaveBalance.sick_used ?? 0)).toFixed(1)}h`} color="#0097a7" to="/leave" />
+            <StatCard label="Comp Time" value={`${((leaveBalance.comp_earned ?? 0) - (leaveBalance.comp_used ?? 0)).toFixed(1)}h`} color="#f57c00" to="/leave" />
           </div>
         </div>
       )}

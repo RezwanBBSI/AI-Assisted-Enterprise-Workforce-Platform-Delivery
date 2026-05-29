@@ -22,6 +22,7 @@ Default demo credentials created automatically:
 import argparse
 import asyncio
 import sys
+from datetime import date, time, timedelta
 
 sys.path.insert(0, ".")  # allow running from backend/
 
@@ -30,8 +31,11 @@ from sqlalchemy import select, text
 from app.core.database import AsyncSessionLocal, Base, engine
 from app.core.security import hash_password
 from app.models.company import Company  # noqa: F401 — ensures table registered
+from app.models.leave_balance import LeaveBalance  # noqa: F401
+from app.models.leave_request import LeaveRequest  # noqa: F401
 from app.models.location import Location  # noqa: F401
 from app.models.role import Role
+from app.models.shift_schedule import ShiftSchedule  # noqa: F401
 from app.models.user import User
 from app.models.user_role import UserRole
 
@@ -164,6 +168,110 @@ async def seed_default_users(db, roles: dict, company: Company) -> None:
         await assign_role(db, email, role_name, roles, company)
 
 
+async def seed_demo_data(db, company: Company) -> None:
+    """Seed realistic demo data: leave balances, leave requests, and schedules.
+    Skipped if data already exists.
+    """
+    # Look up users
+    result = await db.execute(select(User).where(User.email.in_([
+        "admin@bbsi.demo", "manager@bbsi.demo", "employee@bbsi.demo"
+    ])))
+    users = {u.email: u for u in result.scalars().all()}
+    emp = users.get("employee@bbsi.demo")
+    mgr = users.get("manager@bbsi.demo")
+    admin = users.get("admin@bbsi.demo")
+    if not emp or not mgr or not admin:
+        print("  [!] Demo users missing, skipping demo data.")
+        return
+
+    # Get location
+    loc_result = await db.execute(select(Location).where(Location.company_id == company.id))
+    location = loc_result.scalar_one_or_none()
+
+    today = date.today()
+    year = today.year
+
+    # ── Leave balances ────────────────────────────────────────────────────────
+    for user, pto, sick, comp in [
+        (emp,   80.0, 40.0, 8.0),
+        (mgr,   80.0, 40.0, 0.0),
+        (admin, 80.0, 40.0, 0.0),
+    ]:
+        existing = await db.execute(select(LeaveBalance).where(
+            LeaveBalance.employee_id == user.id,
+            LeaveBalance.company_id == company.id,
+            LeaveBalance.year == year,
+        ))
+        bal = existing.scalar_one_or_none()
+        if bal is None:
+            db.add(LeaveBalance(
+                employee_id=user.id, company_id=company.id, year=year,
+                pto_total=pto, pto_used=8.0,
+                sick_total=sick, sick_used=0.0,
+                comp_earned=comp, comp_used=0.0,
+            ))
+            print(f"  [+] Leave balance created for {user.email}")
+        else:
+            # Update to non-zero values if still at defaults
+            if bal.pto_total == 0.0:
+                bal.pto_total = pto
+                bal.sick_total = sick
+                bal.comp_earned = comp
+                print(f"  [~] Leave balance updated for {user.email}")
+            else:
+                print(f"  [=] Leave balance already set for {user.email}")
+
+    # ── Leave requests ────────────────────────────────────────────────────────
+    pending_count = (await db.execute(select(LeaveRequest).where(
+        LeaveRequest.company_id == company.id, LeaveRequest.status == "pending"
+    ))).scalars().all()
+    if not pending_count:
+        next_mon = today + timedelta(days=(7 - today.weekday()))  # next Monday
+        db.add(LeaveRequest(
+            employee_id=emp.id, company_id=company.id,
+            leave_type="pto", days_requested=2,
+            start_date=next_mon, end_date=next_mon + timedelta(days=1),
+            reason="Family appointment", status="pending",
+        ))
+        db.add(LeaveRequest(
+            employee_id=mgr.id, company_id=company.id,
+            leave_type="sick", days_requested=1,
+            start_date=today - timedelta(days=3), end_date=today - timedelta(days=3),
+            reason="Sick day", status="approved",
+            reviewed_by=admin.id, review_comment="Approved",
+        ))
+        print("  [+] Demo leave requests created")
+    else:
+        print("  [=] Leave requests already exist")
+
+    # ── Schedules (shifts for next week) ──────────────────────────────────────
+    shift_count = (await db.execute(select(ShiftSchedule).where(
+        ShiftSchedule.company_id == company.id,
+        ShiftSchedule.shift_date >= today,
+    ))).scalars().all()
+    if not shift_count:
+        next_mon = today + timedelta(days=(7 - today.weekday()))
+        loc_id = location.id if location else None
+        for i, (user, s, e) in enumerate([
+            (emp,   time(9, 0),  time(17, 0)),
+            (emp,   time(9, 0),  time(17, 0)),
+            (emp,   time(9, 0),  time(17, 0)),
+            (mgr,   time(8, 0),  time(16, 0)),
+            (mgr,   time(8, 0),  time(16, 0)),
+            (admin, time(10, 0), time(18, 0)),
+        ]):
+            day = next_mon + timedelta(days=i % 5)
+            db.add(ShiftSchedule(
+                employee_id=user.id, company_id=company.id,
+                location_id=loc_id, shift_date=day,
+                shift_start=s, shift_end=e, break_minutes=30,
+                created_by=admin.id,
+            ))
+        print("  [+] Demo shifts created for next week")
+    else:
+        print("  [=] Future shifts already exist")
+
+
 async def run(email: str | None, role_name: str, reset: bool) -> None:
     if reset:
         await reset_db()
@@ -180,6 +288,9 @@ async def run(email: str | None, role_name: str, reset: bool) -> None:
 
         print("\nSeeding default demo users...")
         await seed_default_users(db, roles, company)
+
+        print("\nSeeding demo data (balances, leave requests, schedules)...")
+        await seed_demo_data(db, company)
 
         if email:
             print(f"\nAssigning {role_name} to {email}...")

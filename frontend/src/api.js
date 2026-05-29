@@ -84,7 +84,7 @@ export const submitLeaveRequest = (token, payload) =>
   request('POST', '/leave-requests', payload, token);
 
 export const reviewLeaveRequest = (token, id, status, comment) =>
-  request('PUT', `/leave-requests/${id}/review`, { status, comment }, token);
+  request('PUT', `/leave-requests/${id}/review`, { approve: status === 'approved', review_comment: comment }, token);
 
 export const cancelLeaveRequest = (token, id) =>
   request('PUT', `/leave-requests/${id}/cancel`, {}, token);
